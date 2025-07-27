@@ -2,6 +2,7 @@
 require '../cors.php';
 require '../db.php'; // mysqli $conn
 
+echo "Test successful!";
 header('Content-Type: application/json');
 
 try {
