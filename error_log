@@ -1,0 +1,26 @@
+[20-Jul-2025 13:34:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'i9885781_sathya_bro_user'@'localhost' (using password: YES) in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/db.php:7
+Stack trace:
+#0 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/db.php(7): mysqli->__construct()
+#1 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php(4): require('/home/bqdbk3kc8...')
+#2 {main}
+  thrown in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/db.php on line 7
+[20-Jul-2025 13:35:51 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'i9885781_sathya_bro_user'@'localhost' (using password: YES) in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php:13
+Stack trace:
+#0 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php(13): mysqli->__construct()
+#1 {main}
+  thrown in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php on line 13
+[20-Jul-2025 13:36:25 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'i9885781_sathya_bro_user'@'localhost' (using password: YES) in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php:13
+Stack trace:
+#0 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php(13): mysqli->__construct()
+#1 {main}
+  thrown in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php on line 13
+[20-Jul-2025 13:36:43 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'i9885781_sathya_bro_user'@'localhost' (using password: YES) in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php:13
+Stack trace:
+#0 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php(13): mysqli->__construct()
+#1 {main}
+  thrown in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php on line 13
+[20-Jul-2025 13:36:45 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'i9885781_sathya_bro_user'@'localhost' (using password: YES) in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php:13
+Stack trace:
+#0 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php(13): mysqli->__construct()
+#1 {main}
+  thrown in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/test_connection.php on line 13

@@ -1,0 +1,26 @@
+[20-Jul-2025 13:32:00 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Access denied for user 'i9885781_sathya_bro_user'@'localhost' (using password: YES) in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/db.php:7
+Stack trace:
+#0 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/db.php(7): mysqli->__construct()
+#1 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php(3): require('/home/bqdbk3kc8...')
+#2 {main}
+  thrown in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/db.php on line 7
+[20-Jul-2025 13:45:33 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Duplicate entry 'john@example.com' for key 'email' in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php:15
+Stack trace:
+#0 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php(15): mysqli_stmt->execute()
+#1 {main}
+  thrown in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php on line 15
+[20-Jul-2025 13:45:37 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Duplicate entry 'john@example.com' for key 'email' in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php:15
+Stack trace:
+#0 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php(15): mysqli_stmt->execute()
+#1 {main}
+  thrown in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php on line 15
+[20-Jul-2025 13:45:44 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Duplicate entry 'john@example.com' for key 'email' in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php:15
+Stack trace:
+#0 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php(15): mysqli_stmt->execute()
+#1 {main}
+  thrown in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php on line 15
+[21-Jul-2025 16:22:27 UTC] PHP Fatal error:  Uncaught mysqli_sql_exception: Duplicate entry 'sathya@example.com' for key 'email' in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php:15
+Stack trace:
+#0 /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php(15): mysqli_stmt->execute()
+#1 {main}
+  thrown in /home/bqdbk3kc80ua/public_html/chandrachaan.com/apis/users/signup.php on line 15
