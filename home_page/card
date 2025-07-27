@@ -1,0 +1,14 @@
+<?php
+header('Content-Type: application/json');
+
+// Set time to UTC+5:30
+$datetime = new DateTime("now", new DateTimeZone("Asia/Kolkata"));
+$createdAt = $datetime->format("Y-m-d H:i:s");
+
+$response = [
+    "title" => "Welcome to the Card API",
+    "subtitle" => "Current Time: $createdAt"
+];
+
+echo json_encode($response);
+?>
