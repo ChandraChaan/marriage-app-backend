@@ -1,14 +1,16 @@
 <?php
-header('Content-Type: application/json');
 
-// Set time to UTC+5:30
-$datetime = new DateTime("now", new DateTimeZone("Asia/Kolkata"));
-$createdAt = $datetime->format("Y-m-d H:i:s");
+// Set timezone to UTC+5:30 (Asia/Kolkata)
+$dateTime = new DateTime("now", new DateTimeZone("Asia/Kolkata"));
+$createdAt = $dateTime->format("Y-m-d H:i:s");
 
-$response = [
-    "title" => "Welcome to the Card API",
-    "subtitle" => "Current Time: $createdAt"
+// Create card data
+$card = [
+    "title" => "Welcome to My Card",
+    "subtitle" => "This is a subtitle for the card.",
+    "created_at" => $createdAt
 ];
 
-echo json_encode($response);
-?>
+// Return JSON response
+header('Content-Type: application/json');
+echo json_encode($card);
