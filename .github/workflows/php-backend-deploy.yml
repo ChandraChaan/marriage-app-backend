@@ -1,0 +1,27 @@
+name: PHP Backend Deployment
+
+on:
+  push:
+    branches:
+      - main  # change if your branch name is different
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Validate PHP Syntax
+        run: find . -name "*.php" -exec php -l {} \;
+
+      - name: Upload Files via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          local-dir: ./ # upload everything from root
+        #   server-dir: /public_html/marriage-app-backend/  # change to match your folder path
