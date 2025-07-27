@@ -1,13 +1,24 @@
 <?php
-require '../cors.php';  // Enable CORS if needed
+require '../cors.php';   // Handle CORS if needed
+require '../db.php';     // Your DB connection
+
 header('Content-Type: application/json');
 
-// Sample data for card
-$card = [
-    "title" => "Welcome to My App",
-    "subtitle" => "Your personalized dashboard"
-];
+$sql = "SELECT title, subtitle FROM cards ORDER BY created_at DESC";
+$result = $conn->query($sql);
 
-// Return JSON response
-echo json_encode($card);
+if (!$result) {
+    http_response_code(500);
+    echo json_encode(["error" => "Failed to fetch data"]);
+    exit;
+}
+
+$cards = [];
+while ($row = $result->fetch_assoc()) {
+    $cards[] = $row;
+}
+
+echo json_encode(["cards" => $cards]);
+
+$conn->close();
 ?>
