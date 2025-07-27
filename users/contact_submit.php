@@ -26,7 +26,7 @@ $subject = trim($data['subject']);
 $message = trim($data['message']); 
 
 // Get accurate UTC time
-$createdAt = (new DateTime("now", new DateTimeZone("IST")))->format("Y-m-d H:i:s");
+$createdAt = (new DateTime("now", new DateTimeZone("Asia/Kolkata")))->format("Y-m-d H:i:s");
 
 // Prepare SQL insert
 $stmt = $conn->prepare("INSERT INTO contact_form (name, email, phone, subject, message, created_at) VALUES (?, ?, ?, ?, ?, ?)");
