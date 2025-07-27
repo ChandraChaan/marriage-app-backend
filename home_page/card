@@ -1,24 +1,34 @@
 <?php
-require '../cors.php';   // Handle CORS if needed
-require '../db.php';     // Your DB connection
+require '../cors.php';  // assuming you want CORS headers enabled
+require '../db.php';    // $conn = new mysqli(...);
 
-header('Content-Type: application/json');
+// We use GET, so no input JSON decoding needed.
 
-$sql = "SELECT title, subtitle FROM cards ORDER BY created_at DESC";
-$result = $conn->query($sql);
+// Prepare SQL to get cards with timezone 'Asia/Kolkata'
+$stmt = $conn->prepare("SELECT title, subtitle, timezone FROM cards WHERE timezone = ?");
+$timezone = 'Asia/Kolkata'; 
+$stmt->bind_param("s", $timezone);
 
-if (!$result) {
-    http_response_code(500);
-    echo json_encode(["error" => "Failed to fetch data"]);
-    exit;
-}
+$stmt->execute();
+$result = $stmt->get_result();
 
 $cards = [];
 while ($row = $result->fetch_assoc()) {
     $cards[] = $row;
 }
 
-echo json_encode(["cards" => $cards]);
+if (count($cards) > 0) {
+    echo json_encode([
+        "status" => "success",
+        "data" => $cards
+    ]);
+} else {
+    echo json_encode([
+        "status" => "error",
+        "message" => "No cards found for timezone Asia/Kolkata."
+    ]);
+}
 
+$stmt->close();
 $conn->close();
 ?>
