@@ -2,7 +2,7 @@
 require '../cors.php';
 header('Content-Type: application/json');
 
-try {
+try { 
     require '../db.php'; // mysqli $conn
     
     // Fetch just the first (or latest) card
