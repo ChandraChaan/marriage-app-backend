@@ -29,7 +29,7 @@ $message = trim($data['message']);
 $createdAt = (new DateTime("now", new DateTimeZone("UTC")))->format("Y-m-d H:i:s");
 
 // Prepare SQL insert
-$stmt = $conn->prepare("INSERT INTO contact_messages (name, email, phone, subject, message, created_at) VALUES (?, ?, ?, ?, ?, ?)");
+$stmt = $conn->prepare("INSERT INTO contact_form (name, email, phone, subject, message, created_at) VALUES (?, ?, ?, ?, ?, ?)");
 $stmt->bind_param("ssssss", $name, $email, $phone, $subject, $message, $createdAt);
 
 // Execute and respond
