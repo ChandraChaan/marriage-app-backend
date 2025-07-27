@@ -1,16 +1,13 @@
 <?php
+require '../cors.php';  // Enable CORS if needed
+header('Content-Type: application/json');
 
-// Set timezone to UTC+5:30 (Asia/Kolkata)
-$dateTime = new DateTime("now", new DateTimeZone("Asia/Kolkata"));
-$createdAt = $dateTime->format("Y-m-d H:i:s");
-
-// Create card data
+// Sample data for card
 $card = [
-    "title" => "Welcome to My Card",
-    "subtitle" => "This is a subtitle for the card.",
-    "created_at" => $createdAt
+    "title" => "Welcome to My App",
+    "subtitle" => "Your personalized dashboard"
 ];
 
 // Return JSON response
-header('Content-Type: application/json');
 echo json_encode($card);
+?>
