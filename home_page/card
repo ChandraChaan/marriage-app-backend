@@ -1,34 +1,36 @@
 <?php
-require '../cors.php';  // assuming you want CORS headers enabled
-require '../db.php';    // $conn = new mysqli(...);
+require '../cors.php';
+require '../db.php'; // mysqli $conn
 
-// We use GET, so no input JSON decoding needed.
+header('Content-Type: application/json');
 
-// Prepare SQL to get cards with timezone 'Asia/Kolkata'
-$stmt = $conn->prepare("SELECT title, subtitle, timezone FROM cards WHERE timezone = ?");
-$timezone = 'Asia/Kolkata'; 
-$stmt->bind_param("s", $timezone);
+try {
+    // Fetch just the first (or latest) card
+    $stmt = $conn->prepare("SELECT title, subtitle FROM cards ORDER BY id DESC LIMIT 1");
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-$stmt->execute();
-$result = $stmt->get_result();
+    if ($card = $result->fetch_assoc()) {
+        http_response_code(200); // OK 
+        echo json_encode([
+            "success" => true,
+            "data" => $card
+        ]);
+    } else {
+        http_response_code(404); // No card
+        echo json_encode([
+            "success" => false,
+            "message" => "No homepage card found."
+        ]);
+    }
 
-$cards = [];
-while ($row = $result->fetch_assoc()) {
-    $cards[] = $row;
-}
-
-if (count($cards) > 0) {
+    $stmt->close();
+    $conn->close();
+} catch (Exception $e) {
+    http_response_code(500); // Server error
     echo json_encode([
-        "status" => "success",
-        "data" => $cards
-    ]);
-} else {
-    echo json_encode([
-        "status" => "error",
-        "message" => "No cards found for timezone Asia/Kolkata."
+        "success" => false,
+        "message" => "Server error: " . $e->getMessage()
     ]);
 }
-
-$stmt->close();
-$conn->close();
 ?>
