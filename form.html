@@ -127,6 +127,9 @@
             <label>Education / Background</label>
             <textarea name="education" required></textarea>
 
+            <label>Year of Education Completion</label>
+            <input type="text" name="education_year" pattern="\d{4}" placeholder="e.g. 2023" required>
+
             <label>Laptop Availability (Yes/No)</label>
             <select name="laptop_availability" required>
                 <option value="">Select</option>
@@ -138,7 +141,15 @@
             <textarea name="languages" required></textarea>
 
             <label>Interested Role</label>
-            <input type="text" name="interested_role" required>
+            <select name="interested_role" required>
+                <option value="">Select</option>
+                <option value="Scriptwriting">Scriptwriting</option>
+                <option value="Historical Research">Historical Research</option>
+                <option value="Voice-over">Voice-over</option>
+                <option value="Video Editing">Video Editing</option>
+                <option value="Social Media Content">Social Media Content</option>
+                <option value="Channel Operations">Channel Operations</option>
+            </select>
 
             <label>Level / Skill Assessment</label>
             <select name="skill_level" required>
@@ -154,11 +165,14 @@
             <label>Why are you interested in historical content?</label>
             <textarea name="why_history" required></textarea>
 
-            <label>How Did You Hear About This?</label>
-            <input type="text" name="how_heard" required>
-
             <label>Availability</label>
-            <input type="text" name="availability" required>
+            <select name="availability" required>
+                <option value="">Select</option>
+                <option value="Immediately">Immediately</option>
+                <option value="Within 1 week">Within 1 week</option>
+                <option value="Within 2 weeks">Within 2 weeks</option>
+                <option value="From next month">From next month</option>
+            </select>
 
             <label>Stipend & Job Commitment (Yes/No + Comments)</label>
             <textarea name="job_commitment" required></textarea>

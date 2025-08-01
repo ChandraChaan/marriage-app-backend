@@ -17,13 +17,13 @@ $phone_number = $_POST['phone_number'];
 $email = $_POST['email'];
 $location = $_POST['location'];
 $education = $_POST['education'];
+$education_year = $_POST['education_year'];
 $laptop_availability = $_POST['laptop_availability'];
 $languages = $_POST['languages'];
 $interested_role = $_POST['interested_role'];
 $skill_level = $_POST['skill_level'];
 $past_experience = $_POST['past_experience'];
 $why_history = $_POST['why_history'];
-$how_heard = $_POST['how_heard'];
 $availability = $_POST['availability'];
 $job_commitment = $_POST['job_commitment'];
 $resume_link = $_POST['resume_link'];
@@ -43,16 +43,16 @@ $check->close();
 
 // Insert
 $sql = "INSERT INTO candidates (
-    full_name, phone_number, email, location, education, laptop_availability,
+    full_name, phone_number, email, location, education, education_year, laptop_availability,
     languages, interested_role, skill_level, past_experience,
-    why_history, how_heard, availability, job_commitment, resume_link
+    why_history, availability, job_commitment, resume_link
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("sssssssssssssss",
-    $full_name, $phone_number, $email, $location, $education, $laptop_availability,
+    $full_name, $phone_number, $email, $location, $education, $education_year, $laptop_availability,
     $languages, $interested_role, $skill_level, $past_experience,
-    $why_history, $how_heard, $availability, $job_commitment, $resume_link
+    $why_history, $availability, $job_commitment, $resume_link
 );
 
 if ($stmt->execute()) {
