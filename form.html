@@ -101,27 +101,15 @@
     <div class="container">
         <h2>Candidate Application Form<br><small style="font-size: 16px; font-weight: normal;">YouTube History Channel Opportunity</small></h2>
 
-        <?php
-        if (isset($_GET['status'])) {
-            $msg = "";
-            $class = "";
-            switch ($_GET['status']) {
-                case 'success':
-                    $msg = "✅ Application submitted successfully.";
-                    $class = "success";
-                    break;
-                case 'duplicate':
-                    $msg = "⚠️ Duplicate entry: This email or phone number already exists.";
-                    $class = "duplicate";
-                    break;
-                case 'error':
-                    $msg = "❌ Error submitting the form. Please try again.";
-                    $class = "error";
-                    break;
-            }
-            echo "<div class='message $class'>$msg</div>";
-        }
-        ?>
+        <?php if (isset($_GET['status'])): ?>
+            <div class="message 
+                <?= $_GET['status'] === 'success' ? 'success' : 
+                    ($_GET['status'] === 'duplicate' ? 'duplicate' : 'error') ?>">
+                <?= $_GET['status'] === 'success' ? '✅ Application submitted successfully.' : 
+                    ($_GET['status'] === 'duplicate' ? '⚠️ Duplicate entry: This email or phone number already exists.' : 
+                    '❌ Error submitting the form. Please try again.') ?>
+            </div>
+        <?php endif; ?>
 
         <form action="submit.php" method="post">
             <label>Full Name</label>
