@@ -1,0 +1,36 @@
+<?php
+require '../cors.php';
+header('Content-Type: application/json');
+
+try { 
+    require '../db.php'; // mysqli $conn
+    
+    // Fetch just the first (or latest) card
+    $stmt = $conn->prepare("SELECT title, subtitle FROM cards ORDER BY id DESC LIMIT 1");
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($card = $result->fetch_assoc()) {
+        http_response_code(200); // OK 
+        echo json_encode([
+            "success" => true,
+            "data" => $card
+        ]);
+    } else {
+        http_response_code(404); // No card
+        echo json_encode([
+            "success" => false,
+            "message" => "No homepage card found."
+        ]);
+    }
+
+    $stmt->close();
+    $conn->close();
+} catch (Exception $e) {
+    http_response_code(500); // Server error
+    echo json_encode([
+        "success" => false,
+        "message" => "Server error: " . $e->getMessage()
+    ]);
+}
+?>

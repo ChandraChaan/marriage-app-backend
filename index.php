@@ -56,7 +56,7 @@
 <body>
 
   <div class="container">
-    <h1>👋 Welcome to Marriage App Backend</h1>
+    <h1> Welcome to Marriage App Backend</h1>
     <p>Your backend is deployed and running successfully.</p>
     <div class="footer">
       Contact: <a href="https://chandrachaan.com" target="_blank">chandrachaan.com</a>
