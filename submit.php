@@ -5,13 +5,13 @@ $dbname = "sathya_app_db";
 $username = "sathya_bro_user";
 $password = "Ch@d1511!S";
 
-// Create DB connection
+// Connect
 $conn = new mysqli($host, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Sanitize and collect POST data
+// Collect data
 $full_name = $_POST['full_name'];
 $phone_number = $_POST['phone_number'];
 $email = $_POST['email'];
@@ -28,14 +28,25 @@ $availability = $_POST['availability'];
 $job_commitment = $_POST['job_commitment'];
 $resume_link = $_POST['resume_link'];
 
-// Insert into DB
+// Check for duplicates
+$check = $conn->prepare("SELECT id FROM candidates WHERE email = ? OR phone_number = ?");
+$check->bind_param("ss", $email, $phone_number);
+$check->execute();
+$check->store_result();
+
+if ($check->num_rows > 0) {
+    // Duplicate found — redirect with error
+    header("Location: form.html?status=duplicate");
+    exit();
+}
+$check->close();
+
+// Insert
 $sql = "INSERT INTO candidates (
     full_name, phone_number, email, location, education, laptop_availability,
     languages, interested_role, skill_level, past_experience,
     why_history, how_heard, availability, job_commitment, resume_link
-) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-)";
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("sssssssssssssss",
@@ -45,11 +56,14 @@ $stmt->bind_param("sssssssssssssss",
 );
 
 if ($stmt->execute()) {
-    echo "Application submitted successfully. Thank you!";
+    // Success — redirect with success
+    header("Location: form.html?status=success");
 } else {
-    echo "Error: " . $stmt->error;
+    // DB error
+    header("Location: form.html?status=error");
 }
 
 $stmt->close();
 $conn->close();
+exit();
 ?>
