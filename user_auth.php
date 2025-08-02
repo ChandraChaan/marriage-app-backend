@@ -20,7 +20,7 @@ if (count($decoded) !== 2 || !is_numeric($decoded[0])) {
 $userId = intval($decoded[0]);
 
 // Optional: Validate user exists
-$stmt = $conn->prepare("SELECT id FROM users WHERE id = ?");
+$stmt = $conn->prepare("SELECT id FROM UserProfile WHERE id = ?");
 $stmt->bind_param("i", $userId);
 $stmt->execute();
 $result = $stmt->get_result();

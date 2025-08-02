@@ -27,7 +27,7 @@ $gender   = trim($data['gender']);
 $dob      = trim($data['dob']);
 
 // Check if email or phone already exists
-$checkStmt = $conn->prepare("SELECT id FROM users WHERE email = ? OR phone = ?");
+$checkStmt = $conn->prepare("SELECT id FROM UserProfile WHERE email = ? OR phone = ?");
 $checkStmt->bind_param("ss", $email, $phone);
 $checkStmt->execute();
 $checkStmt->store_result();
@@ -40,7 +40,7 @@ if ($checkStmt->num_rows > 0) {
 $checkStmt->close();
 
 // Insert new user
-$insertStmt = $conn->prepare("INSERT INTO users (name, email, phone, password, gender, dob) VALUES (?, ?, ?, ?, ?, ?)");
+$insertStmt = $conn->prepare("INSERT INTO UserProfile (name, email, phone, password, gender, dob) VALUES (?, ?, ?, ?, ?, ?)");
 $insertStmt->bind_param("ssssss", $name, $email, $phone, $password, $gender, $dob);
 
 if ($insertStmt->execute()) {

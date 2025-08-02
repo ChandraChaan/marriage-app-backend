@@ -1,25 +1,44 @@
 <?php
 require '../cors.php';
-require '../user_auth.php'; // ✅ dynamic token-based validation
+require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
-// Parse PUT data (application/x-www-form-urlencoded)
 parse_str(file_get_contents("php://input"), $data);
 
-// Validate inputs
-$name   = $data['name']   ?? '';
-$phone  = $data['phone']  ?? '';
-$gender = $data['gender'] ?? '';
-$dob    = $data['dob']    ?? '';
+// Allowed fields in the database
+$allowedFields = [
+    'ProfileCreatedBy', 'MaritalStatus', 'Height', 'Age', 'gender', 'AnyDisability',
+    'FatherOccupation', 'MotherOccupation', 'Brother', 'Sister', 'FamilyStatus', 'DietFood',
+    'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
+    'KujaDosham', 'dob', 'TimeOfBirth', 'CityOfBirth',
+    'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
+    'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName',
+    'AboutMyself', 'name', 'email', 'phone', 'password'
+];
 
-// Validate required fields
-if (empty($name) || empty($gender) || empty($dob)) {
-    echo json_encode(["error" => "Name, gender, and DOB are required."]);
+// Build dynamic query
+$setParts = [];
+$values = [];
+
+foreach ($data as $key => $value) {
+    if (in_array($key, $allowedFields)) {
+        $setParts[] = "$key = ?";
+        $values[] = $value;
+    }
+}
+
+if (empty($setParts)) {
+    echo json_encode(["error" => "No valid fields provided."]);
     exit;
 }
 
-$stmt = $conn->prepare("UPDATE users SET name = ?, phone = ?, gender = ?, dob = ? WHERE id = ?");
-$stmt->bind_param("ssssi", $name, $phone, $gender, $dob, $userId);
+$setClause = implode(", ", $setParts);
+$sql = "UPDATE UserProfile SET $setClause WHERE id = ?";
+$values[] = $userId;
+
+$stmt = $conn->prepare($sql);
+$types = str_repeat('s', count($values) - 1) . 'i';
+$stmt->bind_param($types, ...$values);
 
 if ($stmt->execute()) {
     echo json_encode(["message" => "Profile updated successfully."]);

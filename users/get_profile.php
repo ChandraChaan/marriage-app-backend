@@ -16,7 +16,7 @@ try {
             phone, 
             gender, 
             dob 
-        FROM users 
+        FROM UserProfile 
         WHERE id = ?
     ");
     $stmt->bind_param("i", $userId);
