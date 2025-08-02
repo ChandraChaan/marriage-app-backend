@@ -6,21 +6,41 @@ require '../db.php';
 header('Content-Type: application/json');
 
 try {
-    // Define only safe, required fields (to avoid leaking passwords, tokens, etc.)
+    // Ordered and safe field list (excludes password, token, etc.)
     $fields = [
-        'id', 'name', 'email', 'phone', 'gender', 'dob',
-        'ProfileCreatedBy', 'MaritalStatus', 'Height', 'Age', 'AnyDisability',
+        // System Metadata
+        'id', 'CreatedAt',
+
+        // Account Info
+        'name', 'email', 'phone',
+
+        // Basic Profile
+        'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
+
+        // Family Details
         'FatherOccupation', 'MotherOccupation', 'Brother', 'Sister', 'FamilyStatus', 'DietFood',
+
+        // Religious Background
         'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
+
+        // Astro Details
         'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
+
+        // Location
         'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
-        'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName',
-        'AboutMyself', 'CreatedAt'
+
+        // Education & Career
+        'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
     ];
 
+    // Prepare dynamic field list for query
     $selectFields = implode(', ', array_map(fn($f) => "`$f`", $fields));
 
     $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE id = ?");
+    if (!$stmt) {
+        throw new Exception("SQL prepare failed");
+    }
+
     $stmt->bind_param("i", $userId);
     $stmt->execute();
 
