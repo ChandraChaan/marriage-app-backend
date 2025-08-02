@@ -6,14 +6,14 @@ require '../db.php';
 // Set response content type
 header('Content-Type: application/json');
 
-try {
+try { 
     // Prepare and bind
     $stmt = $conn->prepare("SELECT * FROM cards"); //this is changed
     $stmt->execute();
     $result = $stmt->get_result();
 
     // Fetch and respond
-    if ($userData = $result->fetch_assoc()) {
+    if ($userData = $result->fetch_all()) {
         http_response_code(200); // OK
         echo json_encode([
             "success" => true,
