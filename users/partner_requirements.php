@@ -5,54 +5,52 @@ require '../db.php';
 
 parse_str(file_get_contents("php://input"), $data);
 
-// Allowed fields for updating
 $allowedFields = [
-    // Basic Details
     'ProfileCreatedBy', 'Age', 'Height', 'MotherTongue', 'MaritalStatus',
     'PhysicalStatus', 'Country', 'State', 'City',
-
-    // Religious Details
     'Religion', 'Cast', 'SubCast', 'Dosham',
     'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
-
-    // Education & Career
     'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome'
 ];
 
-$setParts = [];
-$values = [];
+$columns = ['userId'];
+$placeholders = ['?'];
+$updateParts = [];
+$values = [$userId];
 
-foreach ($data as $key => $value) {
-    if (in_array($key, $allowedFields)) {
-        $setParts[] = "$key = ?";
-        $values[] = $value;
+foreach ($allowedFields as $field) {
+    if (isset($data[$field])) {
+        $columns[] = $field;
+        $placeholders[] = '?';
+        $updateParts[] = "$field = VALUES($field)";
+        $values[] = $data[$field];
     }
 }
 
-if (empty($setParts)) {
+if (count($columns) === 1) {
     echo json_encode(["error" => "No valid fields provided."]);
     exit;
 }
 
-$setClause = implode(", ", $setParts);
-$sql = "UPDATE PartnerReqProfile SET $setClause WHERE userId = ?";
-$values[] = $userId;
+$sql = "INSERT INTO PartnerReqProfile (" . implode(", ", $columns) . ") 
+        VALUES (" . implode(", ", $placeholders) . ") 
+        ON DUPLICATE KEY UPDATE " . implode(", ", $updateParts);
 
-// Bind types
-$types = str_repeat('s', count($values) - 1) . 'i';
+$types = str_repeat('s', count($values));
+$types[0] = 'i'; // userId is integer
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
-    echo json_encode(["error" => "Failed to prepare statement."]);
+    echo json_encode(["error" => "Statement preparation failed"]);
     exit;
 }
 
 $stmt->bind_param($types, ...$values);
 
 if ($stmt->execute()) {
-    echo json_encode(["message" => "Partner requirements updated successfully."]);
+    echo json_encode(["message" => "Partner requirement profile saved successfully."]);
 } else {
-    echo json_encode(["error" => "Update failed."]);
+    echo json_encode(["error" => "Insert or update failed."]);
 }
 
 $stmt->close();
