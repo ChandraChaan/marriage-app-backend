@@ -1,6 +1,6 @@
 <?php
 require '../cors.php';
-require '../user_auth.php'; // Ensures $userId is available
+require '../user_auth.php'; // This must set $userId
 require '../db.php';
 
 parse_str(file_get_contents("php://input"), $data);
@@ -37,11 +37,11 @@ $sql = "INSERT INTO PartnerReqProfile (" . implode(", ", $columns) . ")
         ON DUPLICATE KEY UPDATE " . implode(", ", $updateParts);
 
 $types = str_repeat('s', count($values));
-$types[0] = 'i'; // userId is integer
+$types[0] = 'i'; // First is userId, an integer
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
-    echo json_encode(["error" => "Statement preparation failed"]);
+    echo json_encode(["error" => "Failed to prepare statement."]);
     exit;
 }
 
