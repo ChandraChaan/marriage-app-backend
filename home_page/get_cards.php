@@ -8,7 +8,7 @@ header('Content-Type: application/json');
 try {
     if ($conn->connect_error) {
         throw new Exception("Database connection failed: " . $conn->connect_error);
-    }
+    } 
 
     // Explicitly select only the fields you want for clarity
     $query = "SELECT id, image_url, description, website_url FROM cards";
