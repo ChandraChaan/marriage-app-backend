@@ -32,10 +32,12 @@ if ($result->num_rows === 0) {
     echo json_encode(["success" => true, "message" => "No partner requirement profile found."]);
 } else {
     $profile = $result->fetch_assoc();
+    // Add userId to the profile data
+    $profile['userId'] = $userId;
+    
     echo json_encode([
         "success" => true,
-        "data" => $profile,
-        "userId" => $userId
+        "data" => $profile
     ]);
 }
 
