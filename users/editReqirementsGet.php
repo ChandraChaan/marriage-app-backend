@@ -29,12 +29,11 @@ if (empty($setParts)) {
     exit;
 }
 
-// Only perform UPDATE, never INSERT
 $setClause = implode(", ", $setParts);
-$sql = "UPDATE PartnerRedProfile SET $setClause WHERE userId = ?";
+$sql = "UPDATE PartnerReqProfile SET $setClause WHERE userId = ?";
 $values[] = $userId;
 
-// Determine types: assume all are strings except userId at end
+// Determine parameter types: all strings except the final userId which is an int
 $types = str_repeat('s', count($values) - 1) . 'i';
 
 $stmt = $conn->prepare($sql);
@@ -46,18 +45,10 @@ if (!$stmt) {
 $stmt->bind_param($types, ...$values);
 
 if ($stmt->execute()) {
-    // Check if any rows were actually updated
-    if ($stmt->affected_rows > 0) {
-        echo json_encode([
-            "success" => true,
-            "message" => "Partner requirements updated successfully"
-        ]);
-    } else {
-        echo json_encode([
-            "success" => false,
-            "error" => "No matching profile found to update. Please create a profile first."
-        ]);
-    }
+    echo json_encode([
+        "success" => true,
+        "message" => "Partner requirements updated successfully"
+    ]);
 } else {
     echo json_encode([
         "success" => false,
