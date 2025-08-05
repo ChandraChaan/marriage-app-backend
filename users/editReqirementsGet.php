@@ -13,7 +13,7 @@ $allowedFields = [
     'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
     'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome'
 ];
-
+ 
 $setParts = [];
 $values = [];
 
