@@ -1,22 +1,61 @@
 <?php
 require '../cors.php';
-require '../user_auth.php'; // This must set $userId
+require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
-// Ensure userId is set and valid
-if (!isset($userId) || empty($userId)) {
-    echo json_encode(["success" => false, "error" => "Invalid user authentication."]);
+parse_str(file_get_contents("php://input"), $data);
+
+// Secure and ordered list of allowed fields to update for Partner Requirements
+$allowedFields = [
+    'ProfileCreatedBy', 'Age', 'Height', 'MotherTongue', 'MaritalStatus',
+    'PhysicalStatus', 'Country', 'State', 'City',
+    'Religion', 'Cast', 'SubCast', 'Dosham',
+    'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
+    'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome'
+];
+
+$setParts = [];
+$values = [];
+
+foreach ($data as $key => $value) {
+    if (in_array($key, $allowedFields)) {
+        $setParts[] = "$key = ?";
+        $values[] = $value;
+    }
+}
+
+if (empty($setParts)) {
+    echo json_encode(["success" => false, "error" => "No valid fields provided for update."]);
     exit;
 }
 
-// Prepare SQL to fetch user-specific partner requirement profile
-$sql = "SELECT 
-    ProfileCreatedBy, Age, Height, MotherTongue, MaritalStatus,
-    PhysicalStatus, Country, State, City,
-    Religion, Cast, SubCast, Dosham,
-    EatingHabits, SmokingHabits, DrinkingHabits,
-    Qualification, WorkingAs, WorkingWith, ProfessionArea, AnnualIncome
-    FROM PartnerReqProfile WHERE userId = ? LIMIT 1";
+// Check if profile exists
+$checkSql = "SELECT userId FROM PartnerReqProfile WHERE userId = ? LIMIT 1";
+$checkStmt = $conn->prepare($checkSql);
+$checkStmt->bind_param("i", $userId);
+$checkStmt->execute();
+$checkResult = $checkStmt->get_result();
+$profileExists = ($checkResult->num_rows > 0);
+$checkStmt->close();
+
+if ($profileExists) {
+    // Update existing profile
+    $setClause = implode(", ", $setParts);
+    $sql = "UPDATE PartnerReqProfile SET $setClause WHERE userId = ?";
+    $values[] = $userId;
+    
+    // Determine types: assume all are strings except userId at end
+    $types = str_repeat('s', count($values) - 1) . 'i';
+} else {
+    // Insert new profile
+    $columns = implode(", ", array_keys($data));
+    $placeholders = implode(", ", array_fill(0, count($values), '?'));
+    $sql = "INSERT INTO PartnerReqProfile ($columns, userId) VALUES ($placeholders, ?)";
+    $values[] = $userId;
+    
+    // All parameters are strings except userId at end
+    $types = str_repeat('s', count($values) - 1) . 'i';
+}
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
@@ -24,24 +63,20 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-$result = $stmt->get_result();
+$stmt->bind_param($types, ...$values);
 
-if ($result->num_rows === 0) {
-    echo json_encode(["success" => true, "message" => "No partner requirement profile found."]);
-} else {
-    $profile = $result->fetch_assoc();
-    // Add userId to the profile data
-    $profile['userId'] = $userId;
-    
+if ($stmt->execute()) {
     echo json_encode([
         "success" => true,
-        "data" => $profile
+        "message" => "Partner requirements " . ($profileExists ? "updated" : "created") . " successfully"
+    ]);
+} else {
+    echo json_encode([
+        "success" => false,
+        "error" => "Failed to " . ($profileExists ? "update" : "create") . " partner requirements: " . $stmt->error
     ]);
 }
 
-// Clean up
 $stmt->close();
 $conn->close();
 ?>
