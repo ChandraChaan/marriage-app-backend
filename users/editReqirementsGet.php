@@ -29,33 +29,13 @@ if (empty($setParts)) {
     exit;
 }
 
-// Check if profile exists
-$checkSql = "SELECT userId FROM PartnerReqProfile WHERE userId = ? LIMIT 1";
-$checkStmt = $conn->prepare($checkSql);
-$checkStmt->bind_param("i", $userId);
-$checkStmt->execute();
-$checkResult = $checkStmt->get_result();
-$profileExists = ($checkResult->num_rows > 0);
-$checkStmt->close();
+// Only perform UPDATE, never INSERT
+$setClause = implode(", ", $setParts);
+$sql = "UPDATE PartnerRedProfile SET $setClause WHERE userId = ?";
+$values[] = $userId;
 
-if ($profileExists) {
-    // Update existing profile
-    $setClause = implode(", ", $setParts);
-    $sql = "UPDATE PartnerReqProfile SET $setClause WHERE userId = ?";
-    $values[] = $userId;
-    
-    // Determine types: assume all are strings except userId at end
-    $types = str_repeat('s', count($values) - 1) . 'i';
-} else {
-    // Insert new profile
-    $columns = implode(", ", array_keys($data));
-    $placeholders = implode(", ", array_fill(0, count($values), '?'));
-    $sql = "INSERT INTO PartnerReqProfile ($columns, userId) VALUES ($placeholders, ?)";
-    $values[] = $userId;
-    
-    // All parameters are strings except userId at end
-    $types = str_repeat('s', count($values) - 1) . 'i';
-}
+// Determine types: assume all are strings except userId at end
+$types = str_repeat('s', count($values) - 1) . 'i';
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
@@ -66,14 +46,22 @@ if (!$stmt) {
 $stmt->bind_param($types, ...$values);
 
 if ($stmt->execute()) {
-    echo json_encode([
-        "success" => true,
-        "message" => "Partner requirements " . ($profileExists ? "updated" : "created") . " successfully"
-    ]);
+    // Check if any rows were actually updated
+    if ($stmt->affected_rows > 0) {
+        echo json_encode([
+            "success" => true,
+            "message" => "Partner requirements updated successfully"
+        ]);
+    } else {
+        echo json_encode([
+            "success" => false,
+            "error" => "No matching profile found to update. Please create a profile first."
+        ]);
+    }
 } else {
     echo json_encode([
         "success" => false,
-        "error" => "Failed to " . ($profileExists ? "update" : "create") . " partner requirements: " . $stmt->error
+        "error" => "Failed to update partner requirements: " . $stmt->error
     ]);
 }
 
