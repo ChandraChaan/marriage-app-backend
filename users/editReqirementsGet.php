@@ -2,7 +2,7 @@
 require '../cors.php';
 require '../user_auth.php'; // This must set $userId
 require '../db.php';
-
+ 
 // Ensure userId is set and valid
 if (!isset($userId) || empty($userId)) {
     echo json_encode(["error" => "Invalid user authentication."]);
