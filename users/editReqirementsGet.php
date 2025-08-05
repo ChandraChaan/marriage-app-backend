@@ -2,10 +2,10 @@
 require '../cors.php';
 require '../user_auth.php'; // This must set $userId
 require '../db.php';
- 
+
 // Ensure userId is set and valid
 if (!isset($userId) || empty($userId)) {
-    echo json_encode(["error" => "Invalid user authentication."]);
+    echo json_encode(["success" => false, "error" => "Invalid user authentication."]);
     exit;
 }
 
@@ -20,7 +20,7 @@ $sql = "SELECT
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
-    echo json_encode(["error" => "Failed to prepare statement: " . $conn->error]);
+    echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
     exit;
 }
 
@@ -29,10 +29,14 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    echo json_encode(["message" => "No partner requirement profile found."]);
+    echo json_encode(["success" => true, "message" => "No partner requirement profile found."]);
 } else {
     $profile = $result->fetch_assoc();
-    echo json_encode(["userId" => $userId, "data" => $profile]);
+    echo json_encode([
+        "success" => true,
+        "data" => $profile,
+        "userId" => $userId
+    ]);
 }
 
 // Clean up
