@@ -1,77 +1,74 @@
 <?php
 require '../cors.php';
-require '../user_auth.php'; // Sets $userId securely via token
+require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
-header('Content-Type: application/json');
+parse_str(file_get_contents("php://input"), $data);
 
-try {
-    // Ordered and safe field list (excludes password, token, etc.)
-    $fields = [
-        // System Metadata
-        'id', 'CreatedAt',
+// Secure and ordered list of allowed fields to update
+$allowedFields = [
+    // Account Info
+    'name', 'email', 'phone', 'password',
 
-        // Account Info
-        'name', 'email', 'phone',
+    // Basic Profile
+    'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
 
-        // Basic Profile
-        'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
+    // Family Details
+    'FatherOccupation', 'MotherOccupation', 'Brother', 'Sister', 'FamilyStatus', 'DietFood',
 
-        // Family Details
-        'FatherOccupation', 'MotherOccupation', 'Brother', 'Sister', 'FamilyStatus', 'DietFood',
+    // Religious Background
+    'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
 
-        // Religious Background
-        'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
+    // Astro Details
+    'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
 
-        // Astro Details
-        'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
+    // Location
+    'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
 
-        // Location
-        'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
+    // Education & Career
+    'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
+];
 
-        // Education & Career
-        'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName',
-        
-        // Profile Image (stores filename only)
-        'ProfileImage'
-    ];
+$setParts = [];
+$values = [];
 
-    // Prepare dynamic field list for query
-    $selectFields = implode(', ', array_map(fn($f) => "`$f`", $fields));
-
-    $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE id = ?");
-    if (!$stmt) {
-        throw new Exception("SQL prepare failed");
+foreach ($data as $key => $value) {
+    if (in_array($key, $allowedFields)) {
+        if ($key === 'password') {
+            // Optional: hash the password before saving
+            // $value = password_hash($value, PASSWORD_BCRYPT);
+        }
+        $setParts[] = "$key = ?";
+        $values[] = $value;
     }
-
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-
-    $result = $stmt->get_result();
-    $userData = $result->fetch_assoc();
-
-    if ($userData) {
-        // Return the image filename as stored in DB
-        // Frontend will need to construct the full URL to display it
-        echo json_encode([
-            "success" => true,
-            "data" => $userData
-        ]);
-    } else {
-        http_response_code(404);
-        echo json_encode([
-            "success" => false,
-            "error" => "User profile not found."
-        ]);
-    }
-
-    $stmt->close();
-    $conn->close();
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode([
-        "success" => false,
-        "error" => "Server error: " . $e->getMessage()
-    ]);
 }
+
+if (empty($setParts)) {
+    echo json_encode(["error" => "No valid fields provided."]);
+    exit;
+}
+
+$setClause = implode(", ", $setParts);
+$sql = "UPDATE UserProfile SET $setClause WHERE id = ?";
+$values[] = $userId;
+
+// Determine types: assume all are strings except id at end
+$types = str_repeat('s', count($values) - 1) . 'i';
+
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    echo json_encode(["error" => "Failed to prepare statement."]);
+    exit;
+}
+
+$stmt->bind_param($types, ...$values);
+
+if ($stmt->execute()) {
+    echo json_encode(["message" => "Profile updated successfully."]);
+} else {
+    echo json_encode(["error" => "Failed to update profile."]);
+}
+
+$stmt->close();
+$conn->close();
 ?>
