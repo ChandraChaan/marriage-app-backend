@@ -15,7 +15,7 @@ $allowedFields = [
 ];
  
 $setParts = [];
-$values = [];
+$values = []; 
 
 foreach ($data as $key => $value) {
     if (in_array($key, $allowedFields)) {
