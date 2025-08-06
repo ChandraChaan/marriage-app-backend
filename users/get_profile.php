@@ -32,7 +32,7 @@ try {
         // Education & Career
         'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName',
         
-        // Profile Image
+        // Profile Image (stores filename only)
         'ProfileImage'
     ];
 
@@ -51,11 +51,8 @@ try {
     $userData = $result->fetch_assoc();
 
     if ($userData) {
-        // Add full image URL if ProfileImage exists
-        if (!empty($userData['ProfileImage'])) {
-            $userData['ProfileImageUrl'] = 'https://yourdomain.com/uploads/profile_images/' . $userData['ProfileImage'];
-        }
-        
+        // Return the image filename as stored in DB
+        // Frontend will need to construct the full URL to display it
         echo json_encode([
             "success" => true,
             "data" => $userData
