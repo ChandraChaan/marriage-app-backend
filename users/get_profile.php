@@ -1,74 +1,72 @@
 <?php
 require '../cors.php';
-require '../user_auth.php'; // Ensures $userId is available
+require '../user_auth.php'; // Sets $userId securely via token
 require '../db.php';
 
-parse_str(file_get_contents("php://input"), $data);
+header('Content-Type: application/json');
 
-// Secure and ordered list of allowed fields to update
-$allowedFields = [
-    // Account Info
-    'name', 'email', 'phone', 'password',
+try {
+    // Ordered and safe field list (excludes password, token, etc.)
+    $fields = [ 
+        // System Metadata
+        'id', 'CreatedAt',
 
-    // Basic Profile
-    'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
+        // Account Info
+        'name', 'email', 'phone',
 
-    // Family Details
-    'FatherOccupation', 'MotherOccupation', 'Brother', 'Sister', 'FamilyStatus', 'DietFood',
+        // Basic Profile
+        'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
 
-    // Religious Background
-    'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
+        // Family Details
+        'FatherOccupation', 'MotherOccupation', 'Brother', 'Sister', 'FamilyStatus', 'DietFood',
 
-    // Astro Details
-    'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
+        // Religious Background
+        'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
 
-    // Location
-    'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
+        // Astro Details
+        'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
 
-    // Education & Career
-    'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
-];
+        // Location
+        'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
 
-$setParts = [];
-$values = [];
+        // Education & Career
+        'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
+    ];
 
-foreach ($data as $key => $value) {
-    if (in_array($key, $allowedFields)) {
-        if ($key === 'password') {
-            // Optional: hash the password before saving
-            // $value = password_hash($value, PASSWORD_BCRYPT);
-        }
-        $setParts[] = "$key = ?";
-        $values[] = $value;
+    // Prepare dynamic field list for query
+    $selectFields = implode(', ', array_map(fn($f) => "`$f`", $fields));
+
+    $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE id = ?");
+    if (!$stmt) {
+        throw new Exception("SQL prepare failed");
     }
+
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $userData = $result->fetch_assoc();
+
+    if ($userData) {
+        echo json_encode([
+            "success" => true,
+            "data" => $userData
+        ]);
+    } else {
+        http_response_code(404);
+        echo json_encode([
+            "success" => false,
+            "error" => "User profile not found."
+        ]);
+    }
+
+    $stmt->close();
+    $conn->close();
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        "success" => false,
+        "error" => "Server error: " . $e->getMessage()
+    ]);
 }
-
-if (empty($setParts)) {
-    echo json_encode(["error" => "No valid fields provided."]);
-    exit;
-}
-
-$setClause = implode(", ", $setParts);
-$sql = "UPDATE UserProfile SET $setClause WHERE id = ?";
-$values[] = $userId;
-
-// Determine types: assume all are strings except id at end
-$types = str_repeat('s', count($values) - 1) . 'i';
-
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    echo json_encode(["error" => "Failed to prepare statement."]);
-    exit;
-}
-
-$stmt->bind_param($types, ...$values);
-
-if ($stmt->execute()) {
-    echo json_encode(["message" => "Profile updated successfully."]);
-} else {
-    echo json_encode(["error" => "Failed to update profile."]);
-}
-
-$stmt->close();
-$conn->close();
 ?>
