@@ -4,7 +4,9 @@ require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
 // Secure list of fields to retrieve for Partner Requirements
+// Added 'userId' as the first field
 $allowedFields = [
+    'userId', // Added as first field
     'ProfileCreatedBy', 'Age', 'Height', 'MotherTongue', 'MaritalStatus',
     'PhysicalStatus', 'Country', 'State', 'City',
     'Religion', 'Cast', 'SubCast', 'Dosham',
