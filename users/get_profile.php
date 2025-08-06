@@ -30,7 +30,10 @@ try {
         'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
 
         // Education & Career
-        'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
+        'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName',
+        
+        // Profile Image
+        'ProfileImage'
     ];
 
     // Prepare dynamic field list for query
@@ -48,6 +51,11 @@ try {
     $userData = $result->fetch_assoc();
 
     if ($userData) {
+        // Add full image URL if ProfileImage exists
+        if (!empty($userData['ProfileImage'])) {
+            $userData['ProfileImageUrl'] = 'https://yourdomain.com/uploads/profile_images/' . $userData['ProfileImage'];
+        }
+        
         echo json_encode([
             "success" => true,
             "data" => $userData
