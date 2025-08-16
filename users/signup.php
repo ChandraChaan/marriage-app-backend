@@ -1,7 +1,7 @@
 <?php
 require '../cors.php';
 require '../db.php';
-
+ 
 // Set response to JSON
 header('Content-Type: application/json');
 
@@ -10,7 +10,7 @@ $data = json_decode(file_get_contents("php://input"), true);
 
 // Validate required fields
 $required = ['name', 'email', 'phone', 'password', 'gender', 'dob'];
-foreach ($required as $field) {
+foreach ($required as $field) { 
     if (empty($data[$field])) {
         http_response_code(400);
         echo json_encode(["error" => "Missing field: $field"]);
