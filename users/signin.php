@@ -29,4 +29,4 @@ if ($user = $result->fetch_assoc()) {
 } else {
     echo json_encode(["error" => "User not found."]);
 }
-?> 
+?>  
