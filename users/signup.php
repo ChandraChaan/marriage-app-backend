@@ -16,7 +16,7 @@ foreach ($required as $field) {
         echo json_encode(["error" => "Missing field: $field"]);
         exit;
     }
-}
+} 
 
 // Sanitize and assign inputs
 $name     = trim($data['name']);
