@@ -39,11 +39,11 @@ try {
 
     $userGender = $user['gender'];
 
-    // Find opposite gender
-    $oppositeGender = ($userGender === 'Male') ? 'Female' : 'Male';
+    // Determine opposite gender safely (case-insensitive)
+    $oppositeGender = (strtolower(trim($userGender)) === 'male') ? 'Female' : 'Male';
 
-    // Fetch all profiles of opposite gender (excluding logged-in user)
-    $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE gender = ? AND id != ?");
+    // Fetch all profiles of opposite gender (excluding logged-in user), case-insensitive
+    $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE LOWER(TRIM(gender)) = LOWER(TRIM(?)) AND id != ?");
     $stmt->bind_param("si", $oppositeGender, $userId);
     $stmt->execute();
 
