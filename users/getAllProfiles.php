@@ -1,6 +1,7 @@
 <?php
 require '../cors.php';
-require '../db.php'; // removed user_auth.php since token not required
+require '../user_auth.php'; // Sets $userId securely via token
+require '../db.php';
 
 header('Content-Type: application/json');
 
@@ -19,25 +20,31 @@ try {
 
     $selectFields = implode(', ', array_map(fn($f) => "`$f`", $fields));
 
-    // ✅ Get gender from request (mandatory)
-    $input = json_decode(file_get_contents("php://input"), true);
-    $gender = $input['gender'] ?? null;
+    // Get logged-in user's gender from database
+    $stmt = $conn->prepare("SELECT gender FROM UserProfile WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
 
-    if (!$gender) {
+    if (!$user || !isset($user['gender'])) {
         http_response_code(400);
         echo json_encode([
             "success" => false,
-            "error" => "Gender is required."
+            "error" => "User not found or gender missing."
         ]);
         exit;
     }
 
-    // Determine opposite gender safely (case-insensitive)
-    $oppositeGender = (strtolower(trim($gender)) === 'male') ? 'Female' : 'Male';
+    $userGender = $user['gender'];
 
-    // Fetch all profiles of opposite gender
-    $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE LOWER(TRIM(gender)) = LOWER(TRIM(?))");
-    $stmt->bind_param("s", $oppositeGender);
+    // Determine opposite gender safely (case-insensitive)
+    $oppositeGender = (strtolower(trim($userGender)) === 'male') ? 'Female' : 'Male';
+
+    // Fetch all profiles of opposite gender (excluding logged-in user), case-insensitive
+    $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE LOWER(TRIM(gender)) = LOWER(TRIM(?)) AND id != ?");
+    $stmt->bind_param("si", $oppositeGender, $userId);
     $stmt->execute();
 
     $result = $stmt->get_result();
@@ -59,3 +66,4 @@ try {
     ]);
 }
 ?>
+ 
