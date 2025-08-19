@@ -49,10 +49,16 @@ try {
 
     $result = $stmt->get_result();
     $profiles = $result->fetch_all(MYSQLI_ASSOC);
+    
+    // Add profile_id field to each profile (using the existing 'id' field)
+    $profilesWithProfileId = array_map(function($profile) {
+        $profile['profile_id'] = $profile['id']; // Add profile_id field
+        return $profile;
+    }, $profiles);
 
     echo json_encode([
         "success" => true,
-        "data" => $profiles
+        "data" => $profilesWithProfileId // Return profiles with profile_id
     ]);
 
     $stmt->close();
@@ -66,4 +72,3 @@ try {
     ]);
 }
 ?>
- 
