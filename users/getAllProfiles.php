@@ -28,11 +28,12 @@ try {
     $user = $result->fetch_assoc();
     $stmt->close();
 
-    if (!$user || !isset($user['gender'])) {
+    // Gender is mandatory
+    if (!$user || !isset($user['gender']) || trim($user['gender']) === '') {
         http_response_code(400);
         echo json_encode([
             "success" => false,
-            "error" => "User not found or gender missing."
+            "error" => "User gender is mandatory. Please update your profile."
         ]);
         exit;
     }
