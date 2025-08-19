@@ -20,23 +20,30 @@ try {
 
     $selectFields = implode(', ', array_map(fn($f) => "`$f`", $fields));
 
-    // Assume you send gender from frontend securely
-    $userGender = $_POST['gender'] ?? null;
+    // Get logged-in user's gender from database
+    $stmt = $conn->prepare("SELECT gender FROM UserProfile WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
 
-    if (!$userGender) {
+    if (!$user || !isset($user['gender'])) {
         http_response_code(400);
         echo json_encode([
             "success" => false,
-            "error" => "Gender is required."
+            "error" => "User not found or gender missing."
         ]);
         exit;
     }
 
-    // Find opposite gender
-    $oppositeGender = ($userGender === 'Male') ? 'Female' : 'Male';
+    $userGender = $user['gender'];
 
-    // Fetch all profiles of opposite gender (excluding logged-in user)
-    $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE gender = ? AND id != ?");
+    // Determine opposite gender safely (case-insensitive)
+    $oppositeGender = (strtolower(trim($userGender)) === 'male') ? 'Female' : 'Male';
+
+    // Fetch all profiles of opposite gender (excluding logged-in user), case-insensitive
+    $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE LOWER(TRIM(gender)) = LOWER(TRIM(?)) AND id != ?");
     $stmt->bind_param("si", $oppositeGender, $userId);
     $stmt->execute();
 
@@ -50,7 +57,7 @@ try {
 
     $stmt->close();
     $conn->close();
-} catch (Exception $e) {\
+} catch (Exception $e) {
 
     http_response_code(500);
     echo json_encode([
