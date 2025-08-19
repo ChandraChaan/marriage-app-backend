@@ -14,7 +14,7 @@ $allowedFields = [
     'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
 
     // Family Details
-    'FatherOccupation', 'MotherOccupation', 'Brother', 'Sister', 'FamilyStatus', 'DietFood','family details',
+    'FatherOccupation', 'MotherOccupation', 'Brother', 'Sister', 'FamilyStatus', 'DietFood',
 
     // Religious Background
     'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
