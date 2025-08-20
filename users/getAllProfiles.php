@@ -6,7 +6,6 @@ require '../db.php';
 header('Content-Type: application/json');
 
 try {
-    // Ordered and safe field list (excludes password, token, etc.)
     $fields = [ 
         'id', 'CreatedAt',
         'name', 'email', 'phone',
@@ -20,7 +19,7 @@ try {
 
     $selectFields = implode(', ', array_map(fn($f) => "`$f`", $fields));
 
-    // Get logged-in user's gender from database
+    // Get logged-in user's gender
     $stmt = $conn->prepare("SELECT gender FROM UserProfile WHERE id = ?");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
@@ -38,11 +37,9 @@ try {
     }
 
     $userGender = $user['gender'];
-
-    // Determine opposite gender safely (case-insensitive)
     $oppositeGender = (strtolower(trim($userGender)) === 'male') ? 'Female' : 'Male';
 
-    // Fetch all profiles of opposite gender (excluding logged-in user), case-insensitive
+    // Fetch opposite gender profiles
     $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE LOWER(TRIM(gender)) = LOWER(TRIM(?)) AND id != ?");
     $stmt->bind_param("si", $oppositeGender, $userId);
     $stmt->execute();
@@ -50,22 +47,21 @@ try {
     $result = $stmt->get_result();
     $profiles = $result->fetch_all(MYSQLI_ASSOC);
     
-    // Rename `id` to `profile_id` (avoid duplicate with userId)
+    // Add unique profile_id (not same as id or userId)
     $profilesWithProfileId = array_map(function($profile) {
-        $profile['profile_id'] = $profile['id'];
-        unset($profile['id']); // remove duplicate id
+        $profile['profile_id'] = "P" . $profile['id']; // Make it unique
         return $profile;
     }, $profiles);
 
     echo json_encode([
         "success" => true,
+        "user_id" => $userId, // keep logged in userId in response
         "data" => $profilesWithProfileId
     ]);
 
     $stmt->close();
     $conn->close();
 } catch (Exception $e) {
-
     http_response_code(500);
     echo json_encode([
         "success" => false,
