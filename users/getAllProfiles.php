@@ -50,15 +50,16 @@ try {
     $result = $stmt->get_result();
     $profiles = $result->fetch_all(MYSQLI_ASSOC);
     
-    // Add profile_id field to each profile (using the existing 'id' field)
+    // Rename `id` to `profile_id` (avoid duplicate with userId)
     $profilesWithProfileId = array_map(function($profile) {
-        $profile['profile_id'] = $profile['id']; // Add profile_id field
+        $profile['profile_id'] = $profile['id'];
+        unset($profile['id']); // remove duplicate id
         return $profile;
     }, $profiles);
 
     echo json_encode([
         "success" => true,
-        "data" => $profilesWithProfileId // Return profiles with profile_id
+        "data" => $profilesWithProfileId
     ]);
 
     $stmt->close();
