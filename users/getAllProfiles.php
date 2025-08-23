@@ -11,7 +11,7 @@ try {
         'id', 'CreatedAt',
         'name', 'email', 'phone',
         'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
-        'FatherOccupation', 'MotherOccupation', 'Brother', 'Sister', 'FamilyStatus', 'DietFood',
+        'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
         'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
         'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
         'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
