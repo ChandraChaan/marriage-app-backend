@@ -3,28 +3,41 @@ require '../cors.php';
 require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
-parse_str(file_get_contents("php://input"), $data);
+// Use $_POST directly (since curl --data-urlencode sends form-urlencoded)
+$data = $_POST;
 
 // Secure and ordered list of allowed fields to update
 $allowedFields = [
-   'name','email','phone','password',
-   'ProfileCreatedBy','MaritalStatus','gender','dob','Age','Height','AnyDisability','AboutMyself',
-   'FatherOccupation','MotherOccupation','Siblings','FamilyStatus','DietFood',
-   'Religion','MotherTongue','Community','SubCast','CastNoBar','Gothram','FamilyValues',
-   'LivingWithParents','FamilyType','FamilyIncome',
-   'KujaDosham','TimeOfBirth','CityOfBirth',
-   'State','CountryLiving','City','ResidencyStat','ZipPinCode',
-   'Qualification','College','WorkingCompany','WorkingAs','AnnualIncome','CompanyName'
-];
+    // Account Info
+    'name', 'email', 'phone', 'password',
 
+    // Basic Profile
+    'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
+
+    // Family Details
+    'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
+
+    // Religious Background
+    'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
+    'FamilyValues','LivingWithParents','FamilyType','FamilyIncome',
+
+    // Astro Details
+    'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
+
+    // Location
+    'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
+
+    // Education & Career
+    'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
+];
 
 $setParts = [];
 $values = [];
 
 foreach ($data as $key => $value) {
-    if (in_array($key, $allowedFields)) {
+    if (in_array($key, $allowedFields, true)) {
         if ($key === 'password') {
-            // Optional: hash the password before saving
+            // Hash password before saving
             // $value = password_hash($value, PASSWORD_BCRYPT);
         }
         $setParts[] = "$key = ?";
@@ -55,7 +68,7 @@ $stmt->bind_param($types, ...$values);
 if ($stmt->execute()) {
     echo json_encode(["message" => "Profile updated successfully."]);
 } else {
-    echo json_encode(["error" => "Failed to update profile."]);
+    echo json_encode(["error" => "Failed to update profile.", "details" => $stmt->error]);
 }
 
 $stmt->close();
