@@ -13,7 +13,10 @@ try {
         'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
         'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
         'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
-        'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
+        'KujaDosham', 'TimeOfBirth', 'CityOfBirth','Family Values',
+'Living With Parents',
+'Family Type',
+'Family Income',
         'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
         'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
     ];

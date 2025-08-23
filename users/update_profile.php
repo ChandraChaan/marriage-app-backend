@@ -17,8 +17,10 @@ $allowedFields = [
     'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
 
     // Religious Background
-    'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
-
+    'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram','Family Values',
+'Living With Parents',
+'Family Type',
+'Family Income',
     // Astro Details
     'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
 

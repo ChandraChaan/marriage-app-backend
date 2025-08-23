@@ -18,7 +18,10 @@ try {
         'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
 
         // Family Details
-        'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
+        'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood','Family Values',
+'Living With Parents',
+'Family Type',
+'Family Income',
 
         // Religious Background
         'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
