@@ -14,13 +14,11 @@ try {
         'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
         'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
         'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
-        'FamilyValues', 'LivingWithParents', 'FamilyType', 'FamilyIncome',
         'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
         'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
     ];
 
-    // PHP < 7.4 compatible
-    $selectFields = implode(', ', array_map(function ($f) { return "`$f`"; }, $fields));
+    $selectFields = implode(', ', array_map(fn($f) => "`$f`", $fields));
 
     // Get logged-in user's gender from database
     $stmt = $conn->prepare("SELECT gender FROM UserProfile WHERE id = ?");
@@ -66,10 +64,11 @@ try {
     $stmt->close();
     $conn->close();
 } catch (Exception $e) {
+
     http_response_code(500);
     echo json_encode([
         "success" => false,
         "error" => "Server error: " . $e->getMessage()
     ]);
 }
-?>
+?> 

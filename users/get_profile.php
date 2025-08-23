@@ -18,8 +18,7 @@ try {
         'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
 
         // Family Details
-        'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood', 'FamilyValues',
-        'LivingWithParents', 'FamilyType', 'FamilyIncome',
+        'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
 
         // Religious Background
         'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
@@ -39,7 +38,7 @@ try {
 
     $stmt = $conn->prepare("SELECT $selectFields FROM UserProfile WHERE id = ?");
     if (!$stmt) {
-        throw new Exception("SQL prepare failed: " . $conn->error);
+        throw new Exception("SQL prepare failed");
     }
 
     $stmt->bind_param("i", $userId);
