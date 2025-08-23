@@ -19,7 +19,8 @@ try {
         'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
     ];
 
-    $selectFields = implode(', ', array_map(fn($f) => "`$f`", $fields));
+    // PHP < 7.4 compatible
+    $selectFields = implode(', ', array_map(function ($f) { return "`$f`"; }, $fields));
 
     // Get logged-in user's gender from database
     $stmt = $conn->prepare("SELECT gender FROM UserProfile WHERE id = ?");
