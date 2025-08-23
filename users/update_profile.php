@@ -7,29 +7,16 @@ parse_str(file_get_contents("php://input"), $data);
 
 // Secure and ordered list of allowed fields to update
 $allowedFields = [
-    // Account Info
-    'name', 'email', 'phone', 'password',
-
-    // Basic Profile
-    'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
-
-    // Family Details
-    'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
-
-    // Religious Background
-    'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram','Family Values',
-'Living With Parents',
-'Family Type',
-'Family Income',
-    // Astro Details
-    'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
-
-    // Location
-    'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
-
-    // Education & Career
-    'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
+   'name','email','phone','password',
+   'ProfileCreatedBy','MaritalStatus','gender','dob','Age','Height','AnyDisability','AboutMyself',
+   'FatherOccupation','MotherOccupation','Siblings','FamilyStatus','DietFood',
+   'Religion','MotherTongue','Community','SubCast','CastNoBar','Gothram','FamilyValues',
+   'LivingWithParents','FamilyType','FamilyIncome',
+   'KujaDosham','TimeOfBirth','CityOfBirth',
+   'State','CountryLiving','City','ResidencyStat','ZipPinCode',
+   'Qualification','College','WorkingCompany','WorkingAs','AnnualIncome','CompanyName'
 ];
+
 
 $setParts = [];
 $values = [];
