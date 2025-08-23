@@ -13,10 +13,8 @@ try {
         'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
         'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
         'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
-        'KujaDosham', 'TimeOfBirth', 'CityOfBirth','Family Values',
-'Living With Parents',
-'Family Type',
-'Family Income',
+        'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
+        'FamilyValues', 'LivingWithParents', 'FamilyType', 'FamilyIncome',
         'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
         'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
     ];
@@ -67,11 +65,10 @@ try {
     $stmt->close();
     $conn->close();
 } catch (Exception $e) {
-
     http_response_code(500);
     echo json_encode([
         "success" => false,
         "error" => "Server error: " . $e->getMessage()
     ]);
 }
-?> 
+?>
