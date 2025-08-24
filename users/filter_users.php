@@ -1,88 +1,102 @@
 <?php
-// ✅ Show all PHP errors
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 require '../cors.php';
-require '../user_auth.php'; 
+require '../user_auth.php'; // Sets $userId securely via token
 require '../db.php';
 
-// Allowed fields from your UserProfile table (exact list you gave)
-$allowedFields = [
-    'id', 'profile_id', 'name', 'email', 'phone',
-    'CreatedAt', 'ProfileCreatedBy', 'MaritalStatus', 'gender', 'Age', 'Height',
-    'AnyDisability', 'AboutMyself', 'FatherOccupation', 'MotherOccupation', 
-    'FamilyStatus', 'DietFood', 'Religion', 'MotherTongue', 'Community', 'SubCast',
-    'CastNoBar', 'Gothram', 'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
-    'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
-    'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome',
-    'CompanyName', 'Siblings', 'FamilyValues', 'FamilyType', 'LivingWithParents',
-    'FamilyIncome', 'dob'
-];
+header('Content-Type: application/json');
 
-// Build SELECT list
-$fieldList = implode(', ', $allowedFields);
+try {
+    // Ordered and safe field list (excludes password, token, etc.)
+    $fields = [ 
+        'id', 'CreatedAt',
+        'name', 'email', 'phone',
+        'ProfileCreatedBy', 'MaritalStatus', 'gender', 'dob', 'Age', 'Height', 'AnyDisability', 'AboutMyself',
+        'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
+        'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
+        'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
+        'FamilyValues', 'LivingWithParents', 'FamilyType', 'FamilyIncome',
+        'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
+        'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome', 'CompanyName'
+    ];
 
-// Merge GET + POST input
-$requestData = array_merge($_GET, $_POST);
+    // PHP < 7.4 compatible
+    $selectFields = implode(', ', array_map(function ($f) { return "`$f`"; }, $fields));
 
-// Filters
-$filters = [];
-$params = [];
-$types = "";
+    // Get logged-in user's gender from database
+    $stmt = $conn->prepare("SELECT gender FROM UserProfile WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
 
-// Build filters dynamically
-foreach ($allowedFields as $field) {
-    if (!empty($requestData[$field])) {
-        $filters[] = "$field = ?";
-        $params[] = $requestData[$field];
+    if (!$user || !isset($user['gender'])) {
+        http_response_code(400);
+        echo json_encode([
+            "success" => false,
+            "error" => "User not found or gender missing."
+        ]);
+        exit;
+    }
 
-        // Integer vs String
-        if (in_array($field, ['id', 'Age', 'Height', 'AnnualIncome', 'Siblings', 'ZipPinCode'])) {
-            $types .= "i";
-        } else {
+    $userGender = $user['gender'];
+
+    // Determine opposite gender safely (case-insensitive)
+    $oppositeGender = (strtolower(trim($userGender)) === 'male') ? 'Female' : 'Male';
+
+    // Base query
+    $query = "SELECT $selectFields FROM UserProfile WHERE LOWER(TRIM(gender)) = LOWER(TRIM(?)) AND id != ?";
+    $params = [$oppositeGender, $userId];
+    $types = "si";
+
+    // Check if search query is provided
+    if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
+        $searchTerm = trim($_GET['search']);
+        $searchConditions = [];
+        
+        // Create search conditions for each field
+        foreach ($fields as $field) {
+            // Skip fields that shouldn't be searched
+            if (in_array($field, ['id', 'CreatedAt'])) continue;
+            
+            $searchConditions[] = "`$field` LIKE ?";
+            $params[] = "%$searchTerm%";
             $types .= "s";
         }
+        
+        if (!empty($searchConditions)) {
+            $query .= " AND (" . implode(" OR ", $searchConditions) . ")";
+        }
     }
-}
 
-// Base query
-$sql = "SELECT $fieldList FROM UserProfile";
-
-// Add WHERE if filters exist
-if (!empty($filters)) {
-    $sql .= " WHERE " . implode(" AND ", $filters);
-}
-
-$stmt = $conn->prepare($sql);
-
-if (!$stmt) {
-    echo json_encode(["success" => false, "error" => "Failed to prepare: " . $conn->error, "sql" => $sql]);
-    exit;
-}
-
-// Bind params
-if (!empty($filters)) {
+    // Prepare and execute the query
+    $stmt = $conn->prepare($query);
+    
+    // Bind parameters dynamically
     $stmt->bind_param($types, ...$params);
-}
+    $stmt->execute();
 
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result && $result->num_rows > 0) {
+    $result = $stmt->get_result();
     $profiles = $result->fetch_all(MYSQLI_ASSOC);
+    
+    // Add profile_id field to each profile (using the existing 'id' field)
+    $profilesWithProfileId = array_map(function($profile) {
+        $profile['profile_id'] = $profile['id']; // Add profile_id field
+        return $profile;
+    }, $profiles);
+
     echo json_encode([
         "success" => true,
-        "count" => count($profiles),
-        "data" => $profiles
+        "data" => $profilesWithProfileId // Return profiles with profile_id
     ]);
-} else {
+
+    $stmt->close();
+    $conn->close();
+} catch (Exception $e) {
+    http_response_code(500);
     echo json_encode([
         "success" => false,
-        "error" => "No profiles found"
+        "error" => "Server error: " . $e->getMessage()
     ]);
 }
-
-$stmt->close();
-$conn->close();
 ?>
