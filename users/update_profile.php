@@ -36,7 +36,6 @@ $values = [];
 foreach ($data as $key => $value) {
     if (in_array($key, $allowedFields, true)) {
         if ($key === 'password') {
-            // Hash password before saving (optional)
             // $value = password_hash($value, PASSWORD_BCRYPT);
         }
         if ($key === 'dob') {
