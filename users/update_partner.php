@@ -5,6 +5,12 @@ require '../db.php';
 
 parse_str(file_get_contents("php://input"), $data);
 
+// Make sure $data is valid
+if (!is_array($data) || empty($data)) {
+    echo json_encode(["success" => false, "error" => "No input data received."]);
+    exit;
+}
+
 // Secure and ordered list of allowed fields to update for Partner Requirements
 $allowedFields = [
     'ProfileCreatedBy', 'Age', 'Height', 'MotherTongue', 'MaritalStatus',
@@ -13,7 +19,6 @@ $allowedFields = [
     'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
     'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome',
     'EmploymentType','Education',
-    
 ];
  
 $setParts = [];
@@ -46,7 +51,7 @@ if (!$stmt) {
 
 $stmt->bind_param($types, ...$values);
 
-if ($stmt->execute()) {
+if ($stmt->execute() && $stmt->affected_rows > 0) {
     echo json_encode([
         "success" => true,
         "message" => "Partner requirements updated successfully"
@@ -61,4 +66,3 @@ if ($stmt->execute()) {
 $stmt->close();
 $conn->close();
 ?>
-
