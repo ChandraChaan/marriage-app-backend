@@ -51,12 +51,9 @@ try {
 
     // Filterable fields
     $filterableFields = [
-        'ProfileCreatedBy', 'MaritalStatus', 'Age', 'Height', 'AnyDisability',
-        'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
-        'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
-        'KujaDosham', 'CityOfBirth', 'FamilyValues', 'LivingWithParents', 'FamilyType',
-        'FamilyIncome', 'State', 'CountryLiving', 'City', 'ResidencyStat',
-        'Qualification', 'WorkingAs', 'AnnualIncome'
+        'ProfileCreatedBy', 'MaritalStatus', 'Height', 'Siblings', 'FamilyStatus', 'DietFood',
+        'Religion', 'MotherTongue', 'Community', 'FamilyValues', 'LivingWithParents', 'FamilyType',
+        'State', 'CountryLiving', 'City', 'Qualification', 'AnnualIncome'
     ];
 
     // Check if any filter parameters are provided
@@ -66,7 +63,7 @@ try {
             $filterValue = trim($_GET[$field]);
             
             // For numeric fields, use exact match
-            if (in_array($field, ['Age', 'Height', 'Siblings', 'FamilyIncome', 'AnnualIncome'])) {
+            if (in_array($field, ['Siblings', 'AnnualIncome'])) {
                 $filterConditions[] = "`$field` = ?";
                 $params[] = $filterValue;
                 $types .= "i";
