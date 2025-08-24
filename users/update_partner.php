@@ -33,11 +33,9 @@ if (empty($setParts)) {
 
 $setClause = implode(", ", $setParts);
 $sql = "UPDATE PartnerReqProfile SET $setClause WHERE userId = ?";
-
-// Add userId to the values array for binding
 $values[] = $userId;
 
-// Determine parameter types: all strings for the fields, and integer for userId
+// Determine parameter types: all strings except the final userId which is an int
 $types = str_repeat('s', count($values) - 1) . 'i';
 
 $stmt = $conn->prepare($sql);
@@ -46,7 +44,6 @@ if (!$stmt) {
     exit;
 }
 
-// Bind parameters correctly
 $stmt->bind_param($types, ...$values);
 
 if ($stmt->execute()) {
@@ -64,3 +61,4 @@ if ($stmt->execute()) {
 $stmt->close();
 $conn->close();
 ?>
+
