@@ -1,13 +1,13 @@
 <?php
-// ✅ Show all errors while debugging
+// ✅ Show errors while debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 require '../cors.php';
-require '../user_auth.php'; // Ensures $userId is available if needed
+require '../user_auth.php'; 
 require '../db.php';
 
-// Allowed fields from PartnerReqProfile
+// Fields we will select
 $allowedFields = [
     'p.userId',
     'p.ProfileCreatedBy', 'p.Age', 'p.Height', 'p.MotherTongue', 'p.MaritalStatus',
@@ -18,17 +18,12 @@ $allowedFields = [
     'u.Gender', 'u.token'
 ];
 
-// Build SELECT list
 $fieldList = implode(', ', $allowedFields);
 
-// ✅ Merge GET and POST for filters
+// Merge GET + POST input
 $requestData = array_merge($_GET, $_POST);
 
-$filters = [];
-$params = [];
-$types = "";
-
-// Allowed filter fields (without table alias, user can pass Gender=Female etc.)
+// Map request fields to database columns
 $filterableFields = [
     'userId' => 'p.userId',
     'ProfileCreatedBy' => 'p.ProfileCreatedBy',
@@ -57,16 +52,20 @@ $filterableFields = [
 ];
 
 // Build filters dynamically
+$filters = [];
+$params = [];
+$types = "";
+
 foreach ($filterableFields as $inputField => $dbField) {
-    if (isset($requestData[$inputField]) && $requestData[$inputField] !== '') {
+    if (!empty($requestData[$inputField])) {
         $filters[] = "$dbField = ?";
         $params[] = $requestData[$inputField];
 
-        // Type binding
+        // Bind types (integer vs string)
         if (in_array($inputField, ['userId', 'Age', 'Height', 'AnnualIncome'])) {
-            $types .= "i"; // integer
+            $types .= "i";
         } else {
-            $types .= "s"; // string
+            $types .= "s";
         }
     }
 }
@@ -76,7 +75,7 @@ $sql = "SELECT $fieldList
         FROM PartnerReqProfile p
         JOIN UserProfile u ON p.userId = u.userId";
 
-// Add WHERE if needed
+// Add WHERE only if filters exist
 if (!empty($filters)) {
     $sql .= " WHERE " . implode(" AND ", $filters);
 }
@@ -88,6 +87,7 @@ if (!$stmt) {
     exit;
 }
 
+// Bind params if filters exist
 if (!empty($filters)) {
     $stmt->bind_param($types, ...$params);
 }
@@ -105,7 +105,7 @@ if ($result && $result->num_rows > 0) {
 } else {
     echo json_encode([
         "success" => false,
-        "error" => "No profiles found matching criteria"
+        "error" => "No profiles found"
     ]);
 }
 
