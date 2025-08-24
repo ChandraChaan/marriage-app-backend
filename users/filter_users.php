@@ -1,5 +1,5 @@
 <?php
-// ✅ Show errors for debugging
+// ✅ Show all PHP errors
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -7,7 +7,7 @@ require '../cors.php';
 require '../user_auth.php'; 
 require '../db.php';
 
-// Allowed fields from UserProfile
+// Allowed fields from your UserProfile table (exact list you gave)
 $allowedFields = [
     'id', 'profile_id', 'name', 'email', 'phone',
     'CreatedAt', 'ProfileCreatedBy', 'MaritalStatus', 'gender', 'Age', 'Height',
@@ -23,7 +23,7 @@ $allowedFields = [
 // Build SELECT list
 $fieldList = implode(', ', $allowedFields);
 
-// Merge GET + POST data
+// Merge GET + POST input
 $requestData = array_merge($_GET, $_POST);
 
 // Filters
@@ -31,13 +31,13 @@ $filters = [];
 $params = [];
 $types = "";
 
-// Loop through allowed fields and build WHERE conditions
+// Build filters dynamically
 foreach ($allowedFields as $field) {
     if (!empty($requestData[$field])) {
         $filters[] = "$field = ?";
         $params[] = $requestData[$field];
 
-        // Numbers vs strings
+        // Integer vs String
         if (in_array($field, ['id', 'Age', 'Height', 'AnnualIncome', 'Siblings', 'ZipPinCode'])) {
             $types .= "i";
         } else {
@@ -57,7 +57,7 @@ if (!empty($filters)) {
 $stmt = $conn->prepare($sql);
 
 if (!$stmt) {
-    echo json_encode(["success" => false, "error" => "Failed to prepare: " . $conn->error]);
+    echo json_encode(["success" => false, "error" => "Failed to prepare: " . $conn->error, "sql" => $sql]);
     exit;
 }
 
