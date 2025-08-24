@@ -39,6 +39,9 @@ foreach ($data as $key => $value) {
             // Hash password before saving (optional)
             // $value = password_hash($value, PASSWORD_BCRYPT);
         }
+        if ($key === 'dob') {
+            $value = date("d-m-Y", strtotime($value));
+        }
         $setParts[] = "$key = ?";
         $values[] = $value;
     }
