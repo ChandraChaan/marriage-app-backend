@@ -11,11 +11,8 @@ $allowedFields = [
     'PhysicalStatus', 'Country', 'State', 'City',
     'Religion', 'Cast', 'SubCast', 'Dosham',
     'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
-    'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome'
-    'Physical Status','Employment Type','Education',
-    
-
-
+    'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome',
+    'PhysicalStatus','EmploymentType','Education',
     
 ];
  
