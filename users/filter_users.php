@@ -49,6 +49,42 @@ try {
     $params = [$oppositeGender, $userId];
     $types = "si";
 
+    // Filterable fields
+    $filterableFields = [
+        'ProfileCreatedBy', 'MaritalStatus', 'Age', 'Height', 'AnyDisability',
+        'FatherOccupation', 'MotherOccupation', 'Siblings', 'FamilyStatus', 'DietFood',
+        'Religion', 'MotherTongue', 'Community', 'SubCast', 'CastNoBar', 'Gothram',
+        'KujaDosham', 'CityOfBirth', 'FamilyValues', 'LivingWithParents', 'FamilyType',
+        'FamilyIncome', 'State', 'CountryLiving', 'City', 'ResidencyStat',
+        'Qualification', 'WorkingAs', 'AnnualIncome'
+    ];
+
+    // Check if any filter parameters are provided
+    $filterConditions = [];
+    foreach ($filterableFields as $field) {
+        if (isset($_GET[$field]) && !empty(trim($_GET[$field]))) {
+            $filterValue = trim($_GET[$field]);
+            
+            // For numeric fields, use exact match
+            if (in_array($field, ['Age', 'Height', 'Siblings', 'FamilyIncome', 'AnnualIncome'])) {
+                $filterConditions[] = "`$field` = ?";
+                $params[] = $filterValue;
+                $types .= "i";
+            } 
+            // For text fields, use LIKE for partial matching
+            else {
+                $filterConditions[] = "`$field` LIKE ?";
+                $params[] = "%$filterValue%";
+                $types .= "s";
+            }
+        }
+    }
+
+    // Add filter conditions to query
+    if (!empty($filterConditions)) {
+        $query .= " AND (" . implode(" AND ", $filterConditions) . ")";
+    }
+
     // Check if search query is provided
     if (isset($_GET['search']) && !empty(trim($_GET['search']))) {
         $searchTerm = trim($_GET['search']);
