@@ -1,5 +1,5 @@
 <?php
-// ✅ Show all errors (for debugging only, remove in production)
+// ✅ Show all errors while debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -7,53 +7,79 @@ require '../cors.php';
 require '../user_auth.php'; // Ensures $userId is available if needed
 require '../db.php';
 
-// Allowed fields
+// Allowed fields from PartnerReqProfile
 $allowedFields = [
-    'userId',
-    'ProfileCreatedBy', 'Age', 'Height', 'MotherTongue', 'MaritalStatus',
-    'PhysicalStatus', 'Country', 'State', 'City',
-    'Religion', 'Cast', 'SubCast', 'Dosham',
-    'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
-    'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome',
-    'Gender', 'token'
+    'p.userId',
+    'p.ProfileCreatedBy', 'p.Age', 'p.Height', 'p.MotherTongue', 'p.MaritalStatus',
+    'p.PhysicalStatus', 'p.Country', 'p.State', 'p.City',
+    'p.Religion', 'p.Cast', 'p.SubCast', 'p.Dosham',
+    'p.EatingHabits', 'p.SmokingHabits', 'p.DrinkingHabits',
+    'p.Qualification', 'p.WorkingAs', 'p.WorkingWith', 'p.ProfessionArea', 'p.AnnualIncome',
+    'u.Gender', 'u.token'
 ];
 
 // Build SELECT list
 $fieldList = implode(', ', $allowedFields);
 
-// ✅ Merge GET and POST data (so you can send either way)
+// ✅ Merge GET and POST for filters
 $requestData = array_merge($_GET, $_POST);
 
-// Build filters
 $filters = [];
 $params = [];
 $types = "";
 
-// Choose correct param types (i = integer, s = string)
-foreach ($allowedFields as $field) {
-    if (isset($requestData[$field]) && $requestData[$field] !== '') {
-        $filters[] = "$field = ?";
-        $params[] = $requestData[$field];
+// Allowed filter fields (without table alias, user can pass Gender=Female etc.)
+$filterableFields = [
+    'userId' => 'p.userId',
+    'ProfileCreatedBy' => 'p.ProfileCreatedBy',
+    'Age' => 'p.Age',
+    'Height' => 'p.Height',
+    'MotherTongue' => 'p.MotherTongue',
+    'MaritalStatus' => 'p.MaritalStatus',
+    'PhysicalStatus' => 'p.PhysicalStatus',
+    'Country' => 'p.Country',
+    'State' => 'p.State',
+    'City' => 'p.City',
+    'Religion' => 'p.Religion',
+    'Cast' => 'p.Cast',
+    'SubCast' => 'p.SubCast',
+    'Dosham' => 'p.Dosham',
+    'EatingHabits' => 'p.EatingHabits',
+    'SmokingHabits' => 'p.SmokingHabits',
+    'DrinkingHabits' => 'p.DrinkingHabits',
+    'Qualification' => 'p.Qualification',
+    'WorkingAs' => 'p.WorkingAs',
+    'WorkingWith' => 'p.WorkingWith',
+    'ProfessionArea' => 'p.ProfessionArea',
+    'AnnualIncome' => 'p.AnnualIncome',
+    'Gender' => 'u.Gender',
+    'token' => 'u.token'
+];
 
-        if (in_array($field, ['userId', 'Age', 'Height', 'AnnualIncome'])) {
-            $types .= "i"; // integer fields
+// Build filters dynamically
+foreach ($filterableFields as $inputField => $dbField) {
+    if (isset($requestData[$inputField]) && $requestData[$inputField] !== '') {
+        $filters[] = "$dbField = ?";
+        $params[] = $requestData[$inputField];
+
+        // Type binding
+        if (in_array($inputField, ['userId', 'Age', 'Height', 'AnnualIncome'])) {
+            $types .= "i"; // integer
         } else {
-            $types .= "s"; // string fields
+            $types .= "s"; // string
         }
     }
 }
 
-// Base query
-$sql = "SELECT $fieldList FROM PartnerReqProfile";
+// Base query with JOIN
+$sql = "SELECT $fieldList 
+        FROM PartnerReqProfile p
+        JOIN UserProfile u ON p.userId = u.userId";
 
 // Add WHERE if needed
 if (!empty($filters)) {
     $sql .= " WHERE " . implode(" AND ", $filters);
 }
-
-// Debug (optional): uncomment to see query + params
-// echo "SQL: " . $sql . "\n";
-// echo "Params: " . json_encode($params) . "\n";
 
 $stmt = $conn->prepare($sql);
 
@@ -62,7 +88,6 @@ if (!$stmt) {
     exit;
 }
 
-// Bind parameters if filters exist
 if (!empty($filters)) {
     $stmt->bind_param($types, ...$params);
 }
