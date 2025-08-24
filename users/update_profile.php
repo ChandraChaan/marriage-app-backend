@@ -43,7 +43,7 @@ foreach ($data as $key => $value) {
         }
         $setParts[] = "$key = ?";
         $values[] = $value;
-    }
+    } 
 }
 
 if (empty($setParts)) {
