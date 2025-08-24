@@ -1,5 +1,5 @@
 <?php
-// ✅ Show errors while debugging
+// ✅ Show errors for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -7,62 +7,38 @@ require '../cors.php';
 require '../user_auth.php'; 
 require '../db.php';
 
-// Fields we will select
+// Allowed fields from UserProfile
 $allowedFields = [
-    'p.userId',
-    'p.ProfileCreatedBy', 'p.Age', 'p.Height', 'p.MotherTongue', 'p.MaritalStatus',
-    'p.PhysicalStatus', 'p.Country', 'p.State', 'p.City',
-    'p.Religion', 'p.Cast', 'p.SubCast', 'p.Dosham',
-    'p.EatingHabits', 'p.SmokingHabits', 'p.DrinkingHabits',
-    'p.Qualification', 'p.WorkingAs', 'p.WorkingWith', 'p.ProfessionArea', 'p.AnnualIncome',
-    'u.Gender', 'u.token'
+    'id', 'profile_id', 'name', 'email', 'phone',
+    'CreatedAt', 'ProfileCreatedBy', 'MaritalStatus', 'gender', 'Age', 'Height',
+    'AnyDisability', 'AboutMyself', 'FatherOccupation', 'MotherOccupation', 
+    'FamilyStatus', 'DietFood', 'Religion', 'MotherTongue', 'Community', 'SubCast',
+    'CastNoBar', 'Gothram', 'KujaDosham', 'TimeOfBirth', 'CityOfBirth',
+    'State', 'CountryLiving', 'City', 'ResidencyStat', 'ZipPinCode',
+    'Qualification', 'College', 'WorkingCompany', 'WorkingAs', 'AnnualIncome',
+    'CompanyName', 'Siblings', 'FamilyValues', 'FamilyType', 'LivingWithParents',
+    'FamilyIncome', 'dob'
 ];
 
+// Build SELECT list
 $fieldList = implode(', ', $allowedFields);
 
-// Merge GET + POST input
+// Merge GET + POST data
 $requestData = array_merge($_GET, $_POST);
 
-// Map request fields to database columns
-$filterableFields = [
-    'userId' => 'p.userId',
-    'ProfileCreatedBy' => 'p.ProfileCreatedBy',
-    'Age' => 'p.Age',
-    'Height' => 'p.Height',
-    'MotherTongue' => 'p.MotherTongue',
-    'MaritalStatus' => 'p.MaritalStatus',
-    'PhysicalStatus' => 'p.PhysicalStatus',
-    'Country' => 'p.Country',
-    'State' => 'p.State',
-    'City' => 'p.City',
-    'Religion' => 'p.Religion',
-    'Cast' => 'p.Cast',
-    'SubCast' => 'p.SubCast',
-    'Dosham' => 'p.Dosham',
-    'EatingHabits' => 'p.EatingHabits',
-    'SmokingHabits' => 'p.SmokingHabits',
-    'DrinkingHabits' => 'p.DrinkingHabits',
-    'Qualification' => 'p.Qualification',
-    'WorkingAs' => 'p.WorkingAs',
-    'WorkingWith' => 'p.WorkingWith',
-    'ProfessionArea' => 'p.ProfessionArea',
-    'AnnualIncome' => 'p.AnnualIncome',
-    'Gender' => 'u.Gender',
-    'token' => 'u.token'
-];
-
-// Build filters dynamically
+// Filters
 $filters = [];
 $params = [];
 $types = "";
 
-foreach ($filterableFields as $inputField => $dbField) {
-    if (!empty($requestData[$inputField])) {
-        $filters[] = "$dbField = ?";
-        $params[] = $requestData[$inputField];
+// Loop through allowed fields and build WHERE conditions
+foreach ($allowedFields as $field) {
+    if (!empty($requestData[$field])) {
+        $filters[] = "$field = ?";
+        $params[] = $requestData[$field];
 
-        // Bind types (integer vs string)
-        if (in_array($inputField, ['userId', 'Age', 'Height', 'AnnualIncome'])) {
+        // Numbers vs strings
+        if (in_array($field, ['id', 'Age', 'Height', 'AnnualIncome', 'Siblings', 'ZipPinCode'])) {
             $types .= "i";
         } else {
             $types .= "s";
@@ -70,12 +46,10 @@ foreach ($filterableFields as $inputField => $dbField) {
     }
 }
 
-// Base query with JOIN
-$sql = "SELECT $fieldList 
-        FROM PartnerReqProfile p
-        JOIN UserProfile u ON p.userId = u.userId";
+// Base query
+$sql = "SELECT $fieldList FROM UserProfile";
 
-// Add WHERE only if filters exist
+// Add WHERE if filters exist
 if (!empty($filters)) {
     $sql .= " WHERE " . implode(" AND ", $filters);
 }
@@ -87,7 +61,7 @@ if (!$stmt) {
     exit;
 }
 
-// Bind params if filters exist
+// Bind params
 if (!empty($filters)) {
     $stmt->bind_param($types, ...$params);
 }
