@@ -5,12 +5,6 @@ require '../db.php';
 
 parse_str(file_get_contents("php://input"), $data);
 
-// Make sure $data is valid
-if (!is_array($data) || empty($data)) {
-    echo json_encode(["success" => false, "error" => "No input data received."]);
-    exit;
-}
-
 // Secure and ordered list of allowed fields to update for Partner Requirements
 $allowedFields = [
     'ProfileCreatedBy', 'Age', 'Height', 'MotherTongue', 'MaritalStatus',
@@ -19,6 +13,7 @@ $allowedFields = [
     'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
     'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome',
     'EmploymentType','Education',
+    
 ];
  
 $setParts = [];
@@ -38,9 +33,11 @@ if (empty($setParts)) {
 
 $setClause = implode(", ", $setParts);
 $sql = "UPDATE PartnerReqProfile SET $setClause WHERE userId = ?";
+
+// Add userId to the values array for binding
 $values[] = $userId;
 
-// Determine parameter types: all strings except the final userId which is an int
+// Determine parameter types: all strings for the fields, and integer for userId
 $types = str_repeat('s', count($values) - 1) . 'i';
 
 $stmt = $conn->prepare($sql);
@@ -49,9 +46,10 @@ if (!$stmt) {
     exit;
 }
 
+// Bind parameters correctly
 $stmt->bind_param($types, ...$values);
 
-if ($stmt->execute() && $stmt->affected_rows > 0) {
+if ($stmt->execute()) {
     echo json_encode([
         "success" => true,
         "message" => "Partner requirements updated successfully"
