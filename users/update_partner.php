@@ -12,6 +12,11 @@ $allowedFields = [
     'Religion', 'Cast', 'SubCast', 'Dosham',
     'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
     'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome'
+    'Physical Status','Employment Type','Education',
+    
+
+
+    
 ];
  
 $setParts = [];
