@@ -3,8 +3,7 @@ require '../cors.php';
 require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
-// Use $_POST directly (since curl --data-urlencode sends form-urlencoded)
-$data = $_POST;
+parse_str(file_get_contents("php://input"), $data);
 
 // Secure and ordered list of allowed fields to update
 $allowedFields = [
@@ -37,7 +36,7 @@ $values = [];
 foreach ($data as $key => $value) {
     if (in_array($key, $allowedFields, true)) {
         if ($key === 'password') {
-            // Hash password before saving
+            // Hash password before saving (optional)
             // $value = password_hash($value, PASSWORD_BCRYPT);
         }
         $setParts[] = "$key = ?";
