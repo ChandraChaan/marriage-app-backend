@@ -3,26 +3,7 @@ require '../cors.php';
 require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
-// Ensure request method is PUT
-if ($_SERVER['REQUEST_METHOD'] !== 'PUT') {
-    http_response_code(405);
-    echo json_encode(["success" => false, "error" => "Method Not Allowed. Use PUT."]);
-    exit;
-}
-
-// Get PUT data (usually sent as JSON)
-$input = file_get_contents("php://input");
-$data = json_decode($input, true);
-
-// Fallback: if JSON decoding fails, try parsing as form-urlencoded
-if (!is_array($data)) {
-    parse_str($input, $data);
-}
-
-if (!is_array($data)) {
-    echo json_encode(["success" => false, "error" => "Invalid input format."]);
-    exit;
-}
+parse_str(file_get_contents("php://input"), $data);
 
 // Secure and ordered list of allowed fields to update for Partner Requirements
 $allowedFields = [
@@ -32,6 +13,7 @@ $allowedFields = [
     'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
     'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome',
     'EmploymentType','Education',
+    
 ];
  
 $setParts = [];
@@ -64,7 +46,7 @@ if (!$stmt) {
 
 $stmt->bind_param($types, ...$values);
 
-if ($stmt->execute() && $stmt->affected_rows > 0) {
+if ($stmt->execute()) {
     echo json_encode([
         "success" => true,
         "message" => "Partner requirements updated successfully"
@@ -72,10 +54,11 @@ if ($stmt->execute() && $stmt->affected_rows > 0) {
 } else {
     echo json_encode([
         "success" => false,
-        "error" => "No rows updated (check userId or values)."
+        "error" => "Failed to update partner requirements: " . $stmt->error
     ]);
 }
 
 $stmt->close();
 $conn->close();
 ?>
+
