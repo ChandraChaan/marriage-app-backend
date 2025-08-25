@@ -32,7 +32,7 @@ if (empty($setParts)) {
 }
 
 $setClause = implode(", ", $setParts);
-$sql = "UPDATE Update_Partner SET $setClause WHERE userId = ?";
+$sql = "UPDATE PartnerReqProfile SET $setClause WHERE userId = ?";
 $values[] = $userId;
 
 // Determine parameter types: all strings except the final userId which is an int
