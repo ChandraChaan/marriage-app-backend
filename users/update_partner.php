@@ -3,7 +3,8 @@ require '../cors.php';
 require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
-parse_str(file_get_contents("php://input"), $data);
+// Get POST data properly
+$data = $_POST;
  
 // Secure and ordered list of allowed fields to update for Partner Requirements
 $allowedFields = [
@@ -13,7 +14,6 @@ $allowedFields = [
     'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
     'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome',
     'EmploymentType','Education',
-    
 ];
  
 $setParts = [];
@@ -46,7 +46,7 @@ if (!$stmt) {
 
 $stmt->bind_param($types, ...$values);
 
-if ($stmt->execute()) {
+if ($stmt->execute() && $stmt->affected_rows > 0) {
     echo json_encode([
         "success" => true,
         "message" => "Partner requirements updated successfully"
@@ -54,11 +54,10 @@ if ($stmt->execute()) {
 } else {
     echo json_encode([
         "success" => false,
-        "error" => "Failed to update partner requirements: " . $stmt->error
+        "error" => "No rows updated (check userId or values)."
     ]);
 }
 
 $stmt->close();
 $conn->close();
 ?>
-
