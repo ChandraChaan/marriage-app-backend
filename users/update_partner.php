@@ -4,7 +4,7 @@ require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
 parse_str(file_get_contents("php://input"), $data);
-
+ 
 // Secure and ordered list of allowed fields to update for Partner Requirements
 $allowedFields = [
     'ProfileCreatedBy', 'Age', 'Height', 'MotherTongue', 'MaritalStatus',
