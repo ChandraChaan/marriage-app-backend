@@ -3,7 +3,19 @@ require '../cors.php';
 require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
-parse_str(file_get_contents("php://input"), $data);
+// Allow both POST and PUT
+$method = $_SERVER['REQUEST_METHOD'];
+$data = [];
+
+if ($method === 'POST') {
+    $data = $_POST;
+} elseif ($method === 'PUT') {
+    parse_str(file_get_contents("php://input"), $data);
+} else {
+    http_response_code(405);
+    echo json_encode(["success" => false, "error" => "Method Not Allowed. Use POST or PUT."]);
+    exit;
+}
 
 // Secure and ordered list of allowed fields to update for Partner Requirements
 $allowedFields = [
@@ -13,9 +25,8 @@ $allowedFields = [
     'EatingHabits', 'SmokingHabits', 'DrinkingHabits',
     'Qualification', 'WorkingAs', 'WorkingWith', 'ProfessionArea', 'AnnualIncome',
     'EmploymentType','Education',
-    
 ];
- 
+
 $setParts = [];
 $values = []; 
 
@@ -35,8 +46,8 @@ $setClause = implode(", ", $setParts);
 $sql = "UPDATE PartnerReqProfile SET $setClause WHERE userId = ?";
 $values[] = $userId;
 
-// Determine parameter types: all strings except the final userId which is an int
-$types = str_repeat('s', count($values) - 1) . 'i';
+// Bind all as strings (safe for base64 userId too)
+$types = str_repeat('s', count($values));
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
@@ -61,4 +72,3 @@ if ($stmt->execute()) {
 $stmt->close();
 $conn->close();
 ?>
-
