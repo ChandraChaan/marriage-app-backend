@@ -4,8 +4,13 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require '../cors.php';
-require '../user_auth.php'; // Still need user auth for security
+require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
+
+if (!isset($userId) || empty($userId)) {
+    echo json_encode(["success" => false, "error" => "userId is not set"]);
+    exit;
+}
 
 // Allow both POST and PUT
 $method = $_SERVER['REQUEST_METHOD'];
@@ -50,7 +55,12 @@ if (empty($fields)) {
     exit;
 }
 
-// Build SQL - removed userId
+// Always include userId
+$fields[] = "userId";
+$placeholders[] = "?";
+$values[] = $userId;
+
+// Build SQL
 $sql = "INSERT INTO PartnerReqProfile (" . implode(", ", $fields) . ")
         VALUES (" . implode(", ", $placeholders) . ")
         ON DUPLICATE KEY UPDATE " . implode(", ", $updates);
@@ -69,7 +79,8 @@ $stmt->bind_param($types, ...$values);
 if ($stmt->execute()) {
     echo json_encode([
         "success" => true,
-        "message" => "Partner requirements saved successfully (inserted or updated)"
+        "message" => "Partner requirements saved successfully (inserted or updated)",
+        "userId" => $userId
     ]);
 } else {
     echo json_encode([
