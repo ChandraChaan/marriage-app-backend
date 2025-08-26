@@ -1,7 +1,16 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require '../cors.php';
 require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
+
+if (!isset($userId) || empty($userId)) {
+    echo json_encode(["success" => false, "error" => "userId is not set"]);
+    exit;
+}
 
 // Allow both POST and PUT
 $method = $_SERVER['REQUEST_METHOD'];
@@ -27,31 +36,41 @@ $allowedFields = [
     'EmploymentType','Education',
 ];
 
-$setParts = [];
-$values = []; 
+$fields = [];
+$placeholders = [];
+$updates = [];
+$values = [];
 
 foreach ($data as $key => $value) {
     if (in_array($key, $allowedFields)) {
-        $setParts[] = "$key = ?";
+        $fields[] = $key;
+        $placeholders[] = "?";
+        $updates[] = "$key = VALUES($key)";
         $values[] = $value;
     }
 }
 
-if (empty($setParts)) {
+if (empty($fields)) {
     echo json_encode(["success" => false, "error" => "No valid fields provided for update."]);
     exit;
 }
 
-$setClause = implode(", ", $setParts);
-$sql = "UPDATE PartnerReqProfile SET $setClause WHERE userId = ?";
+// Always include userId
+$fields[] = "userId";
+$placeholders[] = "?";
 $values[] = $userId;
 
-// Bind all as strings (safe for base64 userId too)
+// Build SQL
+$sql = "INSERT INTO PartnerReqProfile (" . implode(", ", $fields) . ")
+        VALUES (" . implode(", ", $placeholders) . ")
+        ON DUPLICATE KEY UPDATE " . implode(", ", $updates);
+
+// Bind all as strings
 $types = str_repeat('s', count($values));
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
-    echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
+    echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error, "sql" => $sql]);
     exit;
 }
 
@@ -60,14 +79,15 @@ $stmt->bind_param($types, ...$values);
 if ($stmt->execute()) {
     echo json_encode([
         "success" => true,
-        "message" => "Partner requirements updated successfully"
+        "message" => "Partner requirements saved successfully (inserted or updated)",
+        "userId" => $userId
     ]);
 } else {
     echo json_encode([
         "success" => false,
-        "error" => "Failed to update partner requirements: " . $stmt->error
+        "error" => "Failed to save partner requirements: " . $stmt->error
     ]);
-} 
+}
 
 $stmt->close();
 $conn->close();
