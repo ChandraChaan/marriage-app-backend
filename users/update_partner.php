@@ -67,7 +67,7 @@ if ($stmt->execute()) {
         "success" => false,
         "error" => "Failed to update partner requirements: " . $stmt->error
     ]);
-}
+} 
 
 $stmt->close();
 $conn->close();
