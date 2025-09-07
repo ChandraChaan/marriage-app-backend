@@ -44,8 +44,21 @@ $insertStmt = $conn->prepare("INSERT INTO UserProfile (name, email, phone, passw
 $insertStmt->bind_param("ssssss", $name, $email, $phone, $password, $gender, $dob);
 
 if ($insertStmt->execute()) {
+    $newUserId = $insertStmt->insert_id;
+
+    // Generate token (same as sign in)
+    $token = base64_encode($newUserId . "|" . time());
+
     http_response_code(201); // Created
-    echo json_encode(["message" => "User registered successfully."]);
+    echo json_encode([
+        "message" => "User registered successfully.",
+        "token" => $token,
+        "user" => [
+            "id" => $newUserId,
+            "name" => $name,
+            "email" => $email
+        ]
+    ]);
 } else {
     http_response_code(500); // Internal Server Error
     echo json_encode(["error" => "Registration failed. Please try again."]);
@@ -54,4 +67,3 @@ if ($insertStmt->execute()) {
 $insertStmt->close();
 $conn->close();
 ?>
- 
