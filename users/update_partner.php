@@ -4,30 +4,18 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require '../cors.php';
-require '../user_auth.php'; // Ensures $userId is available
 require '../db.php';
 
-if (!isset($userId) || empty($userId)) {
-    echo json_encode(["success" => false, "error" => "userId is not set"]);
-    exit;
-}
-
-// Allow both POST and PUT
-$method = $_SERVER['REQUEST_METHOD'];
+// Read input (works for both GET query params or POST/PUT body)
 $data = [];
-
-if ($method === 'POST') {
-    $data = $_POST;
-} elseif ($method === 'PUT') {
-    parse_str(file_get_contents("php://input"), $data);
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $data = $_GET;
 } else {
-    http_response_code(405);
-    echo json_encode(["success" => false, "error" => "Method Not Allowed. Use POST or PUT."]);
-    exit;
+    parse_str(file_get_contents("php://input"), $data);
 }
 
-// Secure and ordered list of allowed fields to update for Partner Requirements
-$allowedFields = [
+// Allowed filter fields (these match your PartnerReqProfile allowedFields)
+$allowedFilters = [
     'ProfileCreatedBy', 'Age', 'Height', 'MotherTongue', 'MaritalStatus',
     'PhysicalStatus', 'Country', 'State', 'City',
     'Religion', 'Cast', 'SubCast', 'Dosham',
@@ -36,56 +24,53 @@ $allowedFields = [
     'EmploymentType','Education',
 ];
 
-$fields = [];
-$placeholders = [];
-$updates = [];
+$whereParts = [];
 $values = [];
 
 foreach ($data as $key => $value) {
-    if (in_array($key, $allowedFields)) {
-        $fields[] = $key;
-        $placeholders[] = "?";
-        $updates[] = "$key = VALUES($key)";
+    if (in_array($key, $allowedFilters, true) && !empty($value)) {
+        $whereParts[] = "$key = ?";
         $values[] = $value;
     }
 }
 
-if (empty($fields)) {
-    echo json_encode(["success" => false, "error" => "No valid fields provided for update."]);
-    exit;
+$whereClause = "";
+if (!empty($whereParts)) {
+    $whereClause = "WHERE " . implode(" AND ", $whereParts);
 }
 
-// Always include userId
-$fields[] = "userId";
-$placeholders[] = "?";
-$values[] = $userId;
-
-// Build SQL
-$sql = "INSERT INTO PartnerReqProfile (" . implode(", ", $fields) . ")
-        VALUES (" . implode(", ", $placeholders) . ")
-        ON DUPLICATE KEY UPDATE " . implode(", ", $updates);
-
-// Bind all as strings
-$types = str_repeat('s', count($values));
+// Fetch only useful profile info
+$sql = "SELECT id, name, Age, Height, MotherTongue, MaritalStatus, PhysicalStatus,
+               Country, State, City, Religion, Cast, SubCast, Dosham,
+               EatingHabits, SmokingHabits, DrinkingHabits,
+               Qualification, WorkingAs, WorkingWith, ProfessionArea, AnnualIncome,
+               EmploymentType, Education
+        FROM UserProfile $whereClause";
 
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
-    echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error, "sql" => $sql]);
+    echo json_encode(["success" => false, "error" => "Failed to prepare statement: " . $conn->error]);
     exit;
 }
 
-$stmt->bind_param($types, ...$values);
+// Bind params if filters exist
+if (!empty($values)) {
+    $types = str_repeat('s', count($values));
+    $stmt->bind_param($types, ...$values);
+}
 
 if ($stmt->execute()) {
+    $result = $stmt->get_result();
+    $profiles = $result->fetch_all(MYSQLI_ASSOC);
+
     echo json_encode([
         "success" => true,
-        "message" => "Partner requirements saved successfully (inserted or updated)",
-        "userId" => $userId
+        "profiles" => $profiles
     ]);
 } else {
     echo json_encode([
         "success" => false,
-        "error" => "Failed to save partner requirements: " . $stmt->error
+        "error" => "Failed to fetch profiles: " . $stmt->error
     ]);
 }
 
