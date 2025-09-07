@@ -38,7 +38,7 @@ if ($checkStmt->num_rows > 0) {
     exit;
 }
 $checkStmt->close();
-
+ 
 // Insert new user
 $insertStmt = $conn->prepare("INSERT INTO UserProfile (name, email, phone, password, gender, dob) VALUES (?, ?, ?, ?, ?, ?)");
 $insertStmt->bind_param("ssssss", $name, $email, $phone, $password, $gender, $dob);
